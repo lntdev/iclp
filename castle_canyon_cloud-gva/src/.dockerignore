@@ -1,0 +1,5 @@
+#have to figure out correct file globbing syntax for backup files
+**/privates.js~
+**/privates.js
+**/container-env-private.txt~
+**/container-env-private.txt

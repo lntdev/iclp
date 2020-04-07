@@ -1,0 +1,158 @@
+#load "..\CiqsHelpers\All.csx"
+#load "..\helpers\HelperCommon.csx"
+
+#r "System.Net.Primitives"
+#r "System.Text.Encoding"
+
+using Microsoft.Azure.Management.Graph.RBAC.Fluent;
+using Microsoft.Azure.Management.Graph.RBAC.Fluent.Models;
+using Microsoft.Rest;
+using System.Text.RegularExpressions;
+
+public class AppRole {
+    public string[] allowedMemberTypes { get; set; }
+    public string displayName { get; set; }
+    public string id { get; set; }
+    public bool isEnabled { get; set; }
+    public string description { get; set; }
+    public string value { get; set; }
+
+}
+
+public class Output
+{
+    public string oAppId {get; set;}
+    public string oDomainName {get; set;}
+    public string oObjectId {get; set;}
+    public string oServicePrincipalSecret {get; set;}
+}
+
+public class ResultContainer<T>
+{
+    public T Result {get; set;}
+    public string Error {get; set;}
+}
+
+public static async Task<object> Run(HttpRequestMessage req, TraceWriter log)
+{
+        // Get parameters from SDS     
+        var parametersReader = await CiqsInputParametersReader.FromHttpRequestMessage(req);
+        string azureWebsite = parametersReader.GetParameter<string>("solutionName");
+		string location = parametersReader.GetParameter<string>("location");
+        string tenantId =  parametersReader.GetParameter<string>("tenantId");
+        string graphAccessToken =  parametersReader.GetParameter<string>("graphAccessToken");
+        
+        location = Regex.Replace(location, @"\s", "");
+        log.Info("Location  =  "+location);
+
+        string domain = "https://iclpvp-" + azureWebsite +"."+location+".cloudapp.azure.com:4000";
+       
+
+        // graph.azure.com token
+        TokenCredentials graphTokenCredentials = new TokenCredentials(graphAccessToken);
+
+
+        string servicePrincipalSecret = Guid.NewGuid().ToString();
+        string servicePrincipalPasswordKeyId = Guid.NewGuid().ToString();
+
+        var graphClient = new GraphRbacManagementClient(graphTokenCredentials);
+        graphClient.TenantID = tenantId;
+
+        // Add random alphanumeric characters to the name of the application to avoid naming conflicts
+        string randomName = azureWebsite + "-" + Guid.NewGuid().ToString("n").Substring(0, 10);
+
+        var appResult = await createApplication(graphClient, servicePrincipalSecret, servicePrincipalPasswordKeyId, randomName, domain, log);
+        if (appResult.Error != null) {
+            return CreateCSharpError("Failed to create AAD Application", appResult.Error);
+        }
+        log.Info("Created AAD Application");
+        var app = appResult.Result;
+
+        // Return object
+        Output toReturn = new Output
+        {
+            oAppId = app.AppId,
+            oDomainName = domain,
+            oObjectId = app.ObjectId,
+            oServicePrincipalSecret = servicePrincipalSecret
+        };
+
+        return toReturn;
+}
+
+private static async Task<ResultContainer<ApplicationInner>> createApplication (GraphRbacManagementClient graphClient, string servicePrincipalSecret, string servicePrincipalPasswordKeyId, string displayName, string domain, TraceWriter log) {
+    log.Info("Creating AAD Application...");
+    log.Info("Secret "+servicePrincipalSecret+" DisplayName "+displayName+" Domain "+domain);
+    PasswordCredential pass = new PasswordCredential();
+    pass.StartDate = DateTime.Now;
+    pass.EndDate = DateTime.Now.AddYears(1);
+    pass.Value = servicePrincipalSecret;
+    pass.KeyId = servicePrincipalPasswordKeyId;
+    var resourceAccess = new ResourceAccess 
+    {
+        Id = "311a71cc-e848-46a1-bdf8-97ff7156d8e6",
+        Type = "Scope"
+    };
+    var requiredResourceAccess = new RequiredResourceAccess 
+    {
+        ResourceAccess = new[] {resourceAccess},
+        ResourceAppId = "00000002-0000-0000-c000-000000000000"
+    };
+    var approles = new List<AppRole>(); 
+    approles.Add(new AppRole {
+        allowedMemberTypes = new string[] {"User"},
+        displayName = "Admin",
+        id = "a400a00b-f67c-42b7-ba9a-f73d8c67e433",
+        isEnabled = true,
+        description = "Administrator access to the application",
+        value = "Admin"
+        });
+    approles.Add(new AppRole {
+        allowedMemberTypes = new string[] {"User"},
+        displayName = "Read Only",
+        id = "e5bbd0f5-128e-4362-9dd1-8f253c6082d7",
+        isEnabled = true,
+        description = "Read only access to device information",
+        value = "ReadOnly"
+        });
+    var additionalProperties = new Dictionary<string, object>();
+    additionalProperties.Add("appRoles", approles);
+    var replyUrl = domain+"/user/auth/openid/return";
+    var applicationParameters = new ApplicationCreateParameters
+    {
+        AvailableToOtherTenants = false,
+        DisplayName = displayName,
+        Homepage = domain,
+        ReplyUrls = new[] {replyUrl},
+        IdentifierUris = new[] {domain},
+        PasswordCredentials = new[] {pass},
+        Oauth2AllowImplicitFlow = true,
+        RequiredResourceAccess = new [] {requiredResourceAccess},
+        AdditionalProperties = additionalProperties
+    };
+
+    var retry_count = 0;
+    var retry_time = 5000; // 5 seconds
+    var max_retries = 5;
+
+    string errorText = "";
+    do
+    {
+        if (retry_count > 0) {
+            log.Info("Retrying...");
+        }
+        System.Threading.Thread.Sleep(retry_time * retry_count);
+        try 
+        {
+            var app = await graphClient.Applications.CreateAsync(applicationParameters);
+            return new ResultContainer<ApplicationInner>{Result = app};
+        }
+        catch (GraphErrorException e)
+        {
+            log.Info("Failed to create AAD Application: " + e.Message);
+            errorText = e.Message;
+            retry_count++;
+        }
+    } while (retry_count < max_retries);
+    return new ResultContainer<ApplicationInner>{Error = errorText};
+}

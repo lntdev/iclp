@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Template>
+    <Category>Solution</Category>
+    <Title>Intel Connected Logistics Platform</Title>
+    <Partners>
+        <Partner name="iot" />
+    </Partners>
+    <Owners>
+        <Owner displayname="IoT Solution Authors" email="iot-solution-authors@microsoft.com" />
+    </Owners>
+    <PublishedOn>03/27/2018</PublishedOn>
+    <ImageUrl>{PatternAssetBaseUrl}/intel-connected-logistics-platform.jpg</ImageUrl>
+    <Description>Intel Connected Logistics Platform</Description>
+    <Summary src="Summary.md" format="markdown"/>
+    <EstimatedTime>30-40 Minutes</EstimatedTime>
+
+	<EmailTemplates>
+	<EmailTemplate name="ProvisioningSucceeded" eventId="iot-solution-device-simulation"></EmailTemplate>
+	<EmailTemplate name="ProvisioningFailed" eventId=""></EmailTemplate>
+	</EmailTemplates>
+
+	<Ingredients>
+	  <Ingredient>Web</Ingredient>
+	  <Ingredient>EventHub</Ingredient>	  
+	  <Ingredient>Sql</Ingredient>
+	  <Ingredient>StorageAccount</Ingredient>	
+	  <Ingredient>VirtualMachine</Ingredient>	
+	  <Ingredient>AppInsights</Ingredient>
+	</Ingredients>
+
+    <ProvisioningSteps>
+
+        <ArmDeployment source="defaults.json" title="Generating resource names">
+            <Parameters>
+                <Parameter hidden="true" name="solutionName" defaultValue="{ResourceGroup.Name}" />
+            </Parameters>
+        </ArmDeployment>
+		
+		<AzureFunctionApp use32BitWorkerProcess="false" servicePlanTier="Basic" createStorageAccount="true">
+            <AppSettings>
+                <Add key="AzureWebJobsStorage" value="DefaultEndpointsProtocol=https;AccountName={Outputs.storageAccountName};AccountKey={Outputs.storageAccountKey}" />
+                <Add key="AzureWebJobsDashboard" value="DefaultEndpointsProtocol=https;AccountName={Outputs.storageAccountName};AccountKey={Outputs.storageAccountKey}" />
+                <Add key="WEBSITE_NODE_DEFAULT_VERSION" value="6.5.0" />
+            </AppSettings>
+       </AzureFunctionApp>
+	   
+        <Function name="createAADApplication" title="Creating AAD application" retriable="true">
+            <Parameters>
+                <Parameter name="solutionName" type="string" hidden="true" defaultValue="{ResourceGroup.Name}" />
+				<Parameter name="location" type="string" hidden="true" defaultValue="{Location}" />
+                <Parameter name="tenantId" type="string" hidden="true" defaultValue="{TenantId}" />
+                <Parameter name="graphAccessToken" hidden="true" type="string" defaultValue="{GraphAuthorization}" />
+				<Parameter name="accessToken" hidden="true" type="string"  defaultValue="{Authorization}" />
+				<Parameter name="resourceGroupName" hidden="true" type="string" defaultValue="{ResourceGroup.Name}" />
+            </Parameters>
+        </Function>
+        <Function name="createServicePrincipal" title="Creating service principal" retriable="true">
+            <Parameters>
+                <Parameter name="tenantId" hidden="true" type="string" defaultValue="{TenantId}" />
+                <Parameter name="graphAccessToken" hidden="true" type="string" defaultValue="{GraphAuthorization}" />
+                <Parameter name="appId" hidden="true" type="string" defaultValue="{Outputs.oAppId}" />
+            </Parameters>
+        </Function>
+        <Function name="createRoleAssignment" title="Creating role assignment" retriable="true">
+            <Parameters>
+                <Parameter name="subscriptionId" hidden="true" type="string" defaultValue="{SubscriptionId}" />
+                <Parameter name="accessToken" hidden="true" type="string"  defaultValue="{Authorization}" />
+                <Parameter name="resourceGroupName" hidden="true" type="string" defaultValue="{ResourceGroup.Name}" />
+                <Parameter name="servicePrincipalObjectId" hidden="true" type="string" defaultValue="{Outputs.oServicePrincipalObjectId}" />
+            </Parameters>
+        </Function>
+		
+		 
+        <ArmDeployment source="basic-template.json" title="Creating resources in Azure">
+            <Parameters>
+                <Parameter hidden="true" name="adminUsername" defaultValue="ubuntu" />
+                <Parameter hidden="true" name="adminPassword" defaultValue="{Outputs.oVMPassword}" />
+				<Parameter hidden="true" name="email_server_webapp_name" defaultValue="iclpemailsrvc.azurewebsites.net" />
+				<Parameter hidden="true" name="vp_bootup_script_name" defaultValue="setup_vp_app_p1.sh"/>
+				<Parameter hidden="true" name="gva_bootup_script_name" defaultValue="setup_gva_app_p1.sh"/>				
+				<Parameter hidden="true" name="vp_bootup_script_url" defaultValue="{Outputs.oVpBootupScriptURL}"/>
+				<Parameter hidden="true" name="gva_bootup_script_url" defaultValue="{Outputs.oGvaBootupScriptURL}"/>
+				<Parameter hidden="true" name="vp_source_uri" defaultValue="{Outputs.oVpSourceCodeURL}"/>
+				<Parameter hidden="true" name="gva_source_uri" defaultValue="{Outputs.oGvaSourceCodeURL}"/>                
+                <Parameter hidden="true" name="vpDnsLabelPrefix" defaultValue="{Outputs.oVpDnsLabelPrefix}" />
+                <Parameter hidden="true" name="gvaDnsLabelPrefix" defaultValue="{Outputs.oGvaDnsLabelPrefix}" />
+                <Parameter hidden="true" name="ubuntuOSVersion" defaultValue="16.04.0-LTS" />
+                <Parameter hidden="true" name="iotHubName" defaultValue="{Outputs.oIotHubName}" />
+                <Parameter hidden="true" name="skuName" defaultValue="S1" />
+                <Parameter hidden="true" name="capacityUnits" defaultValue="1" />
+                <Parameter hidden="true" name="d2cMessageRetentionInDaysPeriod" defaultValue="1" />
+                <Parameter hidden="true" name="d2cPartitionCount" defaultValue="2" />
+                <Parameter hidden="true" name="c2dMessagesTTLAsIso8601" defaultValue="PT1H" />
+                <Parameter hidden="true" name="c2dMessagesMaxDeliveryCount" defaultValue="10" />
+                <Parameter hidden="true" name="c2dFeebackMessagesTTLAsIso8601" defaultValue="PT1H" />
+                <Parameter hidden="true" name="c2dFeedbackMessagesMaxDeliveryCount" defaultValue="10" />
+                <Parameter hidden="true" name="c2dFeedbackMessagesLockDurationAsIso8601" defaultValue="PT60S" />
+                <Parameter hidden="true" name="d2cConsumerGroupName" defaultValue="GVA" />
+                <Parameter hidden="true" name="databaseAccountName" defaultValue="{Outputs.oDatabaseAccountName}" />
+                <Parameter hidden="true" name="mssqlDbName" defaultValue="iclpmssqldb" />
+                <Parameter hidden="true" name="sqlAdminLogin" defaultValue="iclpsqladmin" />
+                <Parameter hidden="true" name="sqlAdminPassword" defaultValue="{Outputs.oSQLDBPassword}" />
+                <Parameter hidden="true" name="vpAppInsightName" defaultValue="{Outputs.oVpAppInsightName}" />
+                <Parameter hidden="true" name="vpAppInsightType" defaultValue="Node.JS" />
+                <Parameter hidden="true" name="vpAppInsightRequestSource" defaultValue="IbizaAIExtension" />
+                <Parameter hidden="true" name="location" defaultValue="{Outputs.oLocation}" />
+				<Parameter hidden="true" name="emailAccount" value="{UserId}" title="Email Address" defaultValue="{UserId}"/>
+				<Parameter hidden="true" name="solutionName" defaultValue="{ResourceGroup.Name}" />
+                <Parameter hidden="true" name="webAppName" defaultValue="{ResourceGroup.Name}" />
+				<Parameter hidden="true" name="subscriptionId" defaultValue="{SubscriptionId}"/>
+				<Parameter name="spAppId" hidden="true" value="{Outputs.oAppId}" title="App Id" defaultValue="{Outputs.oAppId}"/>
+				<Parameter name="spObjectId" hidden="true" value="{Outputs.oObjectId}" title="Object Id" defaultValue="{Outputs.oObjectId}"/>
+				<Parameter name="spSecret" hidden="true" value="{Outputs.oServicePrincipalSecret}" title="Service Principal secret" defaultValue="{Outputs.oServicePrincipalSecret}"/>
+				<Parameter name="tenantId" hidden="true" value="{Outputs.oTenantId}" title="Tenant Id" defaultValue="{Outputs.oTenantId}"/>
+            </Parameters>
+        </ArmDeployment>
+
+        <Manual title="Done">
+            <Instructions src="Done.md" format="markdown" />
+        </Manual>
+
+    </ProvisioningSteps>
+
+    <DeProvisioningSteps>
+        <ResourceGroups>
+            <ResourceGroup name="{ResourceGroup.Name}" ></ResourceGroup>
+        </ResourceGroups>
+    </DeProvisioningSteps>
+
+</Template>

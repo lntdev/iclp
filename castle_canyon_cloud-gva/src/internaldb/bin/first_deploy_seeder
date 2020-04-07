@@ -1,0 +1,10 @@
+#!/bin/bash
+
+DIR="$(dirname "$(readlink -f "$0")")"
+
+if [ ! -d "${DIR}/../node_modules" ]; then
+  cd "${DIR}/.."
+  npm i
+fi
+
+"${DIR}/seq" db:seed --debug --seed 20171106230412-core-roles.js

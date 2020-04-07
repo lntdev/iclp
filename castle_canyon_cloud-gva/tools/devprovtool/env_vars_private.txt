@@ -1,0 +1,9 @@
+# template for environment variables that are required for devprovtool
+#
+# DO NOT CHECK THIS FILE IN
+#
+# one env var per line - keep in single quotes
+
+devprovtool_gateway_iot_hub_conn_str='put the gateway iot hubs registryReadWrite connection string here'
+
+devprovtool_tag_iot_hub_conn_str='put the tag iot hubs registryReadWrite connection string here'

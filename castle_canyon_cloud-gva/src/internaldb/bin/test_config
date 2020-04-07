@@ -1,0 +1,19 @@
+#!/usr/bin/env node
+/*eslint-disable no-console */
+
+const config = require('cccommon/config').internaldb.connection();
+
+console.log(`Connecting to [${config.database}] on [${config.host}] as [${config.username}]`);
+
+const Sequelize = require('sequelize');
+const sequelize = new Sequelize(config);
+
+sequelize
+  .authenticate()
+  .then(() => {
+    console.log('Connection has been established successfully.');
+    sequelize.connectionManager.close().then(() => console.log('Shut down gracefully.'));
+  })
+  .catch(err => {
+    console.error('Unable to connect to the database:', err);
+  });

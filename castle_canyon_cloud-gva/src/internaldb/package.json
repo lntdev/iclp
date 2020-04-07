@@ -1,0 +1,14 @@
+{
+  "name": "internaldb",
+  "private": true,
+  "version": "1.0.0",
+  "description": "DB migrations, tools, etc.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "license": "LicenseRef-license.txt",
+  "dependencies": {
+    "sequelize-cli": "3.0.0"
+  }
+}

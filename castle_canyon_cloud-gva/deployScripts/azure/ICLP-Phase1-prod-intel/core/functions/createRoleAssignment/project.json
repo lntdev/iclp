@@ -1,0 +1,13 @@
+{
+  "frameworks": {
+    "net46": {
+      "dependencies": {
+        "System.Net.Http": "4.0.0",
+        "WindowsAzure.Storage": "9.3.2",
+        "Microsoft.Graph": "1.11.0",
+        "Microsoft.Azure.Graph.RBAC":"3.4.0-preview",
+        "Microsoft.Azure.Management.Graph.RBAC.Fluent": "1.16.0"
+      }
+    }
+  }
+}

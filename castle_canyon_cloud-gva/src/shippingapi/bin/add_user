@@ -1,0 +1,44 @@
+#!/usr/bin/env node
+
+/*eslint-disable no-console */
+
+(async () => {
+  try {
+    const argv = process.argv;
+    const usage ='usage: add_user "<username>" "<password>" "<Desk Agent or Dock Worker>"';
+
+    if (argv.length < 5) {
+      console.error(usage);
+      process.exit(1);
+    }
+
+    const ccUser = require('cccommon/user');
+    const models = require('cccommon/models/internaldb');
+
+    const username = argv[2];
+    const password = argv[3];
+    const roleName = argv[4];
+    const now = new Date();
+
+    let role = await models.Role.findOne({attributes: ['id'], where: {name: roleName}});
+    if (!role) {
+      await models.sequelize.close();
+      console.error(`\nRole [${roleName}] not found.\n\n${usage}`);
+      process.exit(1);
+    }
+
+    let user = await models.User.create({
+      email: username,
+      password: ccUser.genPasswordSync(password),
+      token: ''
+    });
+
+    await user.addRole(role);
+
+    await models.sequelize.close();
+
+    console.log(`Added user [${username}] with password [${password}] to role [${roleName}]`);
+  } catch (e) {
+    console.error(e);
+  }
+})();

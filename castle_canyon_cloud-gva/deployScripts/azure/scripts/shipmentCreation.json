@@ -1,0 +1,59 @@
+{
+  "masterAddress": [
+    {
+      "name": "Intel Chandler",
+      "line1": "5000 W Chandler Blvd",
+      "city": "Chandler",
+      "state": "AZ",
+      "pin": "85226",
+      "country": "USA",
+      "phone": "+12149719650",
+      "latitude": "33.3108955",
+      "longitude": "-111.93248249999999"
+    },
+    {
+      "name": "Intel JF3 Oregon",
+      "line1": "2111 NE 25th Ave",
+      "city": "Hillsboro",
+      "state": "OR",
+      "pin": "97124",
+      "country": "USA",
+      "phone": "+1503551234",
+      "latitude": "45.543481199999995",
+      "longitude": "-122.9616726"
+    },
+    {
+      "name": "Intel SRR2 Bangalore",
+      "line1": "Devarabeesanahalli Village",
+      "city": "Bangalore",
+      "state": "Karnataka",
+      "pin": "5600103",
+      "country": "India",
+      "phone": "+9199843023232",
+      "latitude": "12.925622",
+      "longitude": "77.68453049999994"
+    },
+    {
+      "name": "Intel SRR3 Bangalore",
+      "line1": "Devarabeesanahalli Village",
+      "city": "Bangalore",
+      "state": "Karnataka",
+      "pin": "5600104",
+      "country": "India",
+      "phone": "+9199843023232",
+      "latitude": "12.925622",
+      "longitude": "77.68453049999994"
+    },
+    {
+      "name": "Intel Chandler Old",
+      "line1": "1234 SW 1st",
+      "city": "Chandler",
+      "state": "AZ",
+      "pin": "98345",
+      "country": "USA",
+      "phone": "+15035551212",
+      "latitude": "33.3070086",
+      "longitude": "-111.93208010000001"
+    }
+  ]
+}

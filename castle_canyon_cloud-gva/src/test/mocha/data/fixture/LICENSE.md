@@ -1,0 +1,4 @@
+- `The Freight Yard - Donnie Nunley - dbnunley - flickr - 9662136197 - CC BY 2.0.jpg`
+  - Use case: photo upload tests with known-good photo of large size just under the maximum currently supported maximum (5mb)
+  - Source: https://www.flickr.com/photos/dbnunley/9662136197/
+  - License: https://creativecommons.org/licenses/by/2.0/

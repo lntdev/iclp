@@ -1,0 +1,1045 @@
+{  
+   "$schema":"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+   "contentVersion":"1.0.0.0",
+   "parameters":{
+   "email_server_webapp_name":{  
+			 "type":"string",
+			 "defaultValue":"",
+			 "metadata":{  
+				"description":"SVN repository IP"
+			 }
+		  },
+	"vp_bootup_script_name":{  
+			 "type":"string",
+			 "defaultValue":"",
+			 "metadata":{  
+				"description":"VP boot script name"
+			 }
+		  },
+	"gva_bootup_script_name":{  
+			 "type":"string",
+			 "defaultValue":"",
+			 "metadata":{  
+				"description":"GVA boot script name"
+			 }
+		  },
+	"vp_bootup_script_url":{  
+			 "type":"string",
+			 "defaultValue":"",
+			 "metadata":{  
+				"description":"VP boot script URL"
+			 }
+		  },
+	 "gva_bootup_script_url":{  
+			 "type":"string",
+			 "defaultValue":"",
+			 "metadata":{  
+				"description":"GVA boot script URL"
+			 }
+		  },
+	 "vp_source_uri":{  
+			 "type":"string",
+			 "defaultValue":"",
+			 "metadata":{  
+				"description":"VP source code URI"
+			 }
+		  },
+	 "gva_source_uri":{  
+			 "type":"string",
+			 "defaultValue":"",
+			 "metadata":{  
+				"description":"GVA source code URI"
+			 }
+		  },
+	 	"spAppId": {
+				"type": "string",
+				"defaultValue":"",
+				"metadata": {
+				"description": "Service principal App ID"
+			  }
+		},
+		"spObjectId": {
+				"type": "string",
+				"defaultValue":"",
+				"metadata": {
+				"description": "Service principal object ID"
+			  }
+		},
+		"spSecret": {
+				"type": "securestring",
+				"defaultValue":"",
+				"metadata": {
+				"description": "Service principal secret"
+			  }
+		},
+		"tenantId": {
+				"type": "string",
+				"defaultValue":"",
+				"metadata": {
+				"description": "Tenant ID"
+			  }
+		},
+   		"subscriptionId": {
+			"type": "string",
+			"metadata": {
+			"description": "Subscription ID of the Azure account"
+		  }
+		},   
+		"webAppName": {
+			"type": "string",
+			"metadata": {
+			"description": "Base name of the resource such as web app name and app service plan "
+		  }
+		},   
+	   "emailAccount":{  
+         "type":"string",
+         "defaultValue":"",
+         "metadata":{  
+            "description":"Email ID to send the login steps"
+         }
+      },
+	  "solutionName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the solution"
+            }
+      },
+      "adminUsername":{  
+         "type":"string",
+         "defaultValue":"ubuntu",
+         "metadata":{  
+            "description":"User name for the Virtual Machine."
+         }
+      },
+      "adminPassword":{  
+         "type":"securestring",
+         "defaultValue":"",
+         "metadata":{  
+            "description":"Password for the Virtual Machine."
+         }
+      },
+      "vpDnsLabelPrefix":{  
+         "type":"string",
+         "defaultValue":"iclpvp826573074sami"
+      },
+      "gvaDnsLabelPrefix":{  
+         "type":"string",
+         "defaultValue":"iclpgvaebd82926sami"
+      },
+      "ubuntuOSVersion":{  
+         "type":"string",
+         "defaultValue":"16.04.0-LTS",
+         "allowedValues":[  
+            "12.04.5-LTS",
+            "14.04.5-LTS",            
+            "16.04.0-LTS"
+         ],
+         "metadata":{  
+            "description":"The Ubuntu version for the VM. This will pick a fully patched image of this given Ubuntu version."
+         }
+      },
+      "iotHubName":{  
+         "type":"string",
+         "defaultValue":"iothub-iclp-basic"
+      },
+      "skuName":{  
+         "type":"string",
+         "allowedValues":[  
+            "F1",
+            "S1",
+            "S2"
+         ],
+         "defaultValue":"S1",
+         "metadata":{  
+            "description":"One of the supported SKUs: F1, S1 or S2"
+         }
+      },
+      "capacityUnits":{  
+         "type":"int",
+         "minValue":1,
+         "defaultValue":1,
+         "metadata":{  
+            "description":"Number of desired IoT Hub units. Restricted to 1 unit for F1. Can be set up to maximum number allowed for subscription."
+         }
+      },
+      "d2cMessageRetentionInDaysPeriod":{  
+         "type":"int",
+         "minValue":1,
+         "maxValue":7,
+         "defaultValue":1,
+         "metadata":{  
+            "description":"Retention time in days for device-to-cloud messages."
+         }
+      },
+      "d2cPartitionCount":{  
+         "type":"int",
+         "minValue":2,
+         "defaultValue":2,
+         "metadata":{  
+            "description":"Number of desired partitions for device-to-cloud event ingestion."
+         }
+      },
+      "c2dMessagesTTLAsIso8601":{  
+         "type":"string",
+         "defaultValue":"PT1H",
+         "metadata":{  
+            "description":"Default TTL in ISO_8601 format for cloud-to-device messages. The value can range from PT1M to PT2D (or any other format as per ISO_8601 standards for duration)."
+         }
+      },
+      "c2dMessagesMaxDeliveryCount":{  
+         "type":"int",
+         "minValue":1,
+         "maxValue":100,
+         "defaultValue":10,
+         "metadata":{  
+            "description":"Maximum delivery count for cloud-to-device messages per-device queues."
+         }
+      },
+      "c2dFeebackMessagesTTLAsIso8601":{  
+         "type":"string",
+         "defaultValue":"PT1H",
+         "metadata":{  
+            "description":"TTL in ISO_8601 format for service-bound feedback messages. The value can range from PT1M to PT2D (or any other format as per ISO_8601 standards for duration)."
+         }
+      },
+      "c2dFeedbackMessagesMaxDeliveryCount":{  
+         "type":"int",
+         "minValue":1,
+         "maxValue":100,
+         "defaultValue":10,
+         "metadata":{  
+            "description":"Maximum delivery count for feedback queue."
+         }
+      },
+      "c2dFeedbackMessagesLockDurationAsIso8601":{  
+         "type":"string",
+         "defaultValue":"PT60S",
+         "metadata":{  
+            "description":"Lock duration in ISO_8601 format for service-bound feedback messages. The value can range from PT5S to PT300S (or any other format as per ISO_8601 standards for duration)."
+         }
+      },
+      "d2cConsumerGroupName":{  
+         "type":"string",
+         "minLength":3,
+         "defaultValue":"GVA",
+         "metadata":{  
+            "description":"Name of device-to-cloud consumer group to provision on the IoT Hub instance."
+         }
+      },
+      "databaseAccountName":{  
+         "type":"string",
+         "defaultValue":"cosmosdb-iclp-basic"
+      },
+      "mssqlDbName":{  
+         "type":"string",
+         "defaultValue":"iclpmssqldb",
+         "metadata":{  
+            "description":"These credentials can be used to access the Azure SQL database."
+         }
+      },
+      "sqlAdminLogin":{  
+         "type":"string",
+         "defaultValue":"iclpsqladmin",
+         "metadata":{  
+            "description":"These credentials can be used to access the Azure SQL database."
+         }
+      },
+      "sqlAdminPassword":{  
+         "type":"securestring",
+         "defaultValue":"Ic1psqlPassw0rd",
+         "metadata":{  
+            "description":"The password can be used to access the SQL database."
+         }
+      },
+      "vpAppInsightName":{  
+         "type":"string",
+         "defaultValue":"gvaappinsights-iclp-basic"
+      },
+      "vpAppInsightType":{  
+         "type":"string",
+         "defaultValue":"Node.JS"
+      },
+      "vpAppInsightRequestSource":{  
+         "type":"string",
+         "defaultValue":"IbizaAIExtension"
+      },
+      "location":{  
+         "type":"string",
+         "defaultValue":"[resourceGroup().location]",
+         "metadata":{  
+            "description":"Location for all resources."
+         }
+      }
+   },
+   "variables":{
+	  "email_server_webapp_name": "[parameters('email_server_webapp_name')]",
+	  "vp_bootup_script_name": "[parameters('vp_bootup_script_name')]",
+	  "gva_bootup_script_name": "[parameters('gva_bootup_script_name')]",	  	  
+	  "vp_bootup_script_url": "[parameters('vp_bootup_script_url')]",
+	  "gva_bootup_script_url": "[parameters('gva_bootup_script_url')]",	  
+	  "vp_source_uri": "[parameters('vp_source_uri')]",
+	  "gva_source_uri": "[parameters('gva_source_uri')]",	  	 
+      "storageAccountName":"[toLower(concat('iclpsa',uniquestring(resourceGroup().id)))]",
+      "vpAppInsightName":"[toLower(concat('iclpGvaInsights-',uniquestring(resourceGroup().id)))]",
+      "iotHubName":"[toLower(concat('iclpiothub-',uniquestring(resourceGroup().id)))]",
+      "databaseAccountName":"[toLower(concat('iclpnosqldb-',uniquestring(resourceGroup().id)))]",
+      "imagePublisher":"Canonical",
+      "imageOffer":"UbuntuServer",
+      "vpNicName":"iclp-vp-nic",
+      "gvaNicName":"iclp-gva-nic",
+      "nsgName":"iclp-nsg",
+      "addressPrefix":"10.0.0.0/16",
+      "subnetName":"iclp-subnet",
+      "subnetPrefix":"10.0.0.0/24",
+      "storageAccountType":"Standard_LRS",
+      "vpPublicIPAddressName":"iclp-vp-ip",
+      "gvaPublicIPAddressName":"iclp-gva-ip",
+      "publicIPAddressType":"Dynamic",
+      "vpvmName":"iclp-vp-vm",
+      "vpDnsLabelPrefix":"[toLower(concat('iclpvp-',resourceGroup().name))]",
+      "gvaDnsLabelPrefix":"[toLower(concat('iclpgva-',resourceGroup().name))]",
+      "gvavmName":"iclp-gva-vm",
+      "vmSize":"Standard_A1",
+      "virtualNetworkName":"iclp-vnet",
+      "subnetRef":"[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]",
+      "apiVersion":"2016-02-03",
+      "cosmosApiVersion":"2015-04-08",
+      "cosmosResourceId":"[resourceId('Microsoft.DocumentDB/databaseAccounts', variables('databaseAccountName'))]",
+      "location":"[parameters('location')]",
+	  "emailAccount":"[parameters('emailAccount')]",
+	  "solutionName":"[parameters('solutionName')]",
+      "vpScriptExtension":"vpScriptExtension",
+      "tierSymbol":{  
+         "Basic":"B",
+         "GeneralPurpose":"GP",
+         "MemoryOptimized":"MO"
+      },
+      "mssqlServer":"[toLower(concat('sqlserver-',uniquestring(resourceGroup().id)))]",
+      "mssqlDatabaseName":"[parameters('mssqlDbName')]",
+      "mssqlDbHost":"[concat(variables('mssqlServer'),'.database.windows.net')]",
+      "GVAUrl":"[reference(variables('gvaPublicIPAddressName')).dnsSettings.fqdn]:3001",
+      "pcsurl":"https://basiciotrm.azurewebsites.net",
+      "shipmentgw2cloudinterval":"15",
+      "iotHubConnectionString":"test",	  
+      "singleQuote":"'",
+      "vpport":"3000",
+      "gvaAppInsightResourceId":"[resourceId('Microsoft.Insights/components', variables('vpAppInsightName'))]",
+      "eventHubReourceId":"[resourceId('Microsoft.Devices/IoTHubs',variables('iotHubName'))]",
+      "vpvmextName":"[concat(variables('vpvmName'),'/', 'scriptExtension')]",
+      "gvavmextName":"[concat(variables('gvavmName'),'/', 'scriptExtension')]",
+	  "vpWebProxyName": "[concat(parameters('webAppName'), '-vp-webapp')]",
+      "vpWebAppSrvcName": "[concat(parameters('webAppName'), '-vp-AppServicePlan')]",
+	  "gvaWebProxyName": "[concat(parameters('webAppName'), '-gva-webapp')]",
+      "gvaWebAppSrvcName": "[concat(parameters('webAppName'), '-gva-AppServicePlan')]",
+	  "spAppId":"[parameters('spAppId')]",
+	  "spObjectId":"[parameters('spObjectId')]",
+	  "spSecret":"[parameters('spSecret')]",
+	  "tenantId":"[parameters('tenantId')]",
+	  "subscriptionId":"[parameters('subscriptionId')]"
+   },
+   "resources":[  
+      {  
+         "type":"Microsoft.Storage/storageAccounts",
+         "name":"[variables('storageAccountName')]",
+         "apiVersion":"2017-06-01",
+         "location":"[parameters('location')]",
+         "sku":{  
+            "name":"[variables('storageAccountType')]"
+         },
+         "kind":"Storage",
+         "properties":{  
+
+         }
+      },
+      {  
+         "apiVersion":"2017-04-01",
+         "type":"Microsoft.Network/publicIPAddresses",
+         "name":"[variables('vpPublicIPAddressName')]",
+         "location":"[parameters('location')]",
+         "properties":{  
+            "publicIPAllocationMethod":"[variables('publicIPAddressType')]",
+            "dnsSettings":{  
+               "domainNameLabel":"[variables('vpDnsLabelPrefix')]"
+            }
+         }
+      },
+      {  
+         "apiVersion":"2017-04-01",
+         "type":"Microsoft.Network/publicIPAddresses",
+         "name":"[variables('gvaPublicIPAddressName')]",
+         "location":"[parameters('location')]",
+         "properties":{  
+            "publicIPAllocationMethod":"[variables('publicIPAddressType')]",
+            "dnsSettings":{  
+               "domainNameLabel":"[variables('gvaDnsLabelPrefix')]"
+            }
+         }
+      },
+      {  
+         "apiVersion":"2017-04-01",
+         "type":"Microsoft.Network/virtualNetworks",
+         "name":"[variables('virtualNetworkName')]",
+         "location":"[parameters('location')]",
+         "properties":{  
+            "addressSpace":{  
+               "addressPrefixes":[  
+                  "[variables('addressPrefix')]"
+               ]
+            },
+            "subnets":[  
+               {  
+                  "name":"[variables('subnetName')]",
+                  "properties":{  
+                     "addressPrefix":"[variables('subnetPrefix')]"
+                  }
+               }
+            ]
+         }
+      },
+      {  
+         "apiVersion":"2017-04-01",
+         "type":"Microsoft.Network/networkInterfaces",
+         "name":"[variables('vpNicName')]",
+         "location":"[parameters('location')]",
+         "dependsOn":[  
+            "[resourceId('Microsoft.Network/publicIPAddresses/', variables('vpPublicIPAddressName'))]",
+            "[resourceId('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
+            "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
+         ],
+         "properties":{  
+            "ipConfigurations":[  
+               {  
+                  "name":"ipconfig1",
+                  "properties":{  
+                     "privateIPAllocationMethod":"Dynamic",
+                     "publicIPAddress":{  
+                        "id":"[resourceId('Microsoft.Network/publicIPAddresses',variables('vpPublicIPAddressName'))]"
+                     },
+                     "subnet":{  
+                        "id":"[variables('subnetRef')]"
+                     }
+                  }
+               }
+            ],
+            "networkSecurityGroup":{  
+               "id":"[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
+            }
+         }
+      },
+      {  
+         "apiVersion":"2017-04-01",
+         "type":"Microsoft.Network/networkInterfaces",
+         "name":"[variables('gvaNicName')]",
+         "location":"[parameters('location')]",
+         "dependsOn":[  
+            "[resourceId('Microsoft.Network/publicIPAddresses/', variables('gvaPublicIPAddressName'))]",
+            "[resourceId('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
+            "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
+         ],
+         "properties":{  
+            "ipConfigurations":[  
+               {  
+                  "name":"ipconfig1",
+                  "properties":{  
+                     "privateIPAllocationMethod":"Dynamic",
+                     "publicIPAddress":{  
+                        "id":"[resourceId('Microsoft.Network/publicIPAddresses',variables('gvaPublicIPAddressName'))]"
+                     },
+                     "subnet":{  
+                        "id":"[variables('subnetRef')]"
+                     }
+                  }
+               }
+            ],
+            "networkSecurityGroup":{  
+               "id":"[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
+            }
+         }
+      },
+      {  
+         "type":"Microsoft.Network/networkSecurityGroups",
+         "name":"[variables('nsgName')]",
+         "location":"[resourceGroup().location]",
+         "apiVersion":"2018-03-01",
+         "properties":{  
+            "securityRules":[  
+               {  
+                  "name":"SSH",
+                  "properties":{  
+                     "description":"Allows SSH traffic",
+                     "protocol":"Tcp",
+                     "sourcePortRange":"*",
+                     "destinationPortRange":"22",
+                     "sourceAddressPrefix":"*",
+                     "destinationAddressPrefix":"*",
+                     "access":"Allow",
+                     "priority":100,
+                     "direction":"Inbound"
+                  }
+               },
+               {  
+                  "name":"HTTPS",
+                  "properties":{  
+                     "protocol":"TCP",
+                     "sourcePortRange":"*",
+                     "destinationPortRange":"443",
+                     "sourceAddressPrefix":"*",
+                     "destinationAddressPrefix":"*",
+                     "access":"Allow",
+                     "priority":101,
+                     "direction":"Inbound"
+                  }
+               },              
+               {  
+                  "name":"port_3000",
+                  "properties":{  
+                     "provisioningState":"Succeeded",
+                     "description":"react",
+                     "protocol":"*",
+                     "sourcePortRange":"*",
+                     "destinationPortRange":"3000",
+                     "sourceAddressPrefix":"*",
+                     "destinationAddressPrefix":"*",
+                     "access":"Allow",
+                     "priority":1055,
+                     "direction":"Inbound",
+                     "sourcePortRanges":[  
+
+                     ],
+                     "destinationPortRanges":[  
+
+                     ],
+                     "sourceAddressPrefixes":[  
+
+                     ],
+                     "destinationAddressPrefixes":[  
+
+                     ]
+                  }
+               },
+               {  
+                  "name":"port_3001",
+                  "properties":{  
+                     "provisioningState":"Succeeded",
+                     "description":"react",
+                     "protocol":"*",
+                     "sourcePortRange":"*",
+                     "destinationPortRange":"3001",
+                     "sourceAddressPrefix":"*",
+                     "destinationAddressPrefix":"*",
+                     "access":"Allow",
+                     "priority":1056,
+                     "direction":"Inbound",
+                     "sourcePortRanges":[  
+
+                     ],
+                     "destinationPortRanges":[  
+
+                     ],
+                     "sourceAddressPrefixes":[  
+
+                     ],
+                     "destinationAddressPrefixes":[  
+
+                     ]
+                  }
+               },
+               {  
+                  "name":"port_3002",
+                  "properties":{  
+                     "provisioningState":"Succeeded",
+                     "description":"react",
+                     "protocol":"*",
+                     "sourcePortRange":"*",
+                     "destinationPortRange":"3002",
+                     "sourceAddressPrefix":"*",
+                     "destinationAddressPrefix":"*",
+                     "access":"Allow",
+                     "priority":1057,
+                     "direction":"Inbound",
+                     "sourcePortRanges":[  
+
+                     ],
+                     "destinationPortRanges":[  
+
+                     ],
+                     "sourceAddressPrefixes":[  
+
+                     ],
+                     "destinationAddressPrefixes":[  
+
+                     ]
+                  }
+               },
+               {  
+                  "name":"port_3005",
+                  "properties":{  
+                     "provisioningState":"Succeeded",
+                     "description":"react",
+                     "protocol":"*",
+                     "sourcePortRange":"*",
+                     "destinationPortRange":"3005",
+                     "sourceAddressPrefix":"*",
+                     "destinationAddressPrefix":"*",
+                     "access":"Allow",
+                     "priority":1058,
+                     "direction":"Inbound",
+                     "sourcePortRanges":[  
+
+                     ],
+                     "destinationPortRanges":[  
+
+                     ],
+                     "sourceAddressPrefixes":[  
+
+                     ],
+                     "destinationAddressPrefixes":[  
+
+                     ]
+                  }
+               }
+            ]
+         }
+      },
+      {  
+         "apiVersion":"2017-03-30",
+         "type":"Microsoft.Compute/virtualMachines",
+         "name":"[variables('vpvmName')]",
+         "location":"[parameters('location')]",
+		 "identity": {
+			"type": "SystemAssigned"
+		},
+         "dependsOn":[  
+            "[resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
+            "[resourceId('Microsoft.Network/networkInterfaces/', variables('vpNicName'))]",
+            "[resourceId('Microsoft.Devices/IotHubs/', variables('iotHubName'))]",
+            "[resourceId('Microsoft.Sql/servers/', variables('mssqlServer'))]",
+            "[resourceId('Microsoft.DocumentDB/databaseAccounts/', variables('databaseAccountName'))]",
+            "[concat('Microsoft.Compute/virtualMachines/', concat(variables('gvavmName')))]"
+         ],
+         "properties":{  
+            "hardwareProfile":{  
+               "vmSize":"[variables('vmSize')]"
+            },
+            "osProfile":{  
+               "computerName":"[variables('vpvmName')]",
+               "adminUsername":"[parameters('adminUsername')]",
+               "adminPassword":"[parameters('adminPassword')]"
+            },
+            "storageProfile":{  
+               "imageReference":{  
+                  "publisher":"[variables('imagePublisher')]",
+                  "offer":"[variables('imageOffer')]",
+                  "sku":"[parameters('ubuntuOSVersion')]",
+                  "version":"latest"
+               },
+               "osDisk":{  
+                  "createOption":"FromImage"
+               },
+               "dataDisks":[  
+                  {  
+                     "diskSizeGB":500,
+                     "lun":0,
+                     "createOption":"Empty"
+                  }
+               ]
+            },
+            "networkProfile":{  
+               "networkInterfaces":[  
+                  {  
+                     "id":"[resourceId('Microsoft.Network/networkInterfaces',variables('vpNicName'))]"
+                  }
+               ]
+            },
+            "diagnosticsProfile":{  
+               "bootDiagnostics":{  
+                  "enabled":true,
+                  "storageUri":"[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), '2016-01-01').primaryEndpoints.blob)]"
+               }
+            }
+         }
+      },
+      {  
+         "apiVersion":"2017-03-30",
+         "type":"Microsoft.Compute/virtualMachines",
+         "name":"[variables('gvavmName')]",
+         "location":"[parameters('location')]",
+         "dependsOn":[  
+            "[resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
+            "[resourceId('Microsoft.Network/networkInterfaces/', variables('gvaNicName'))]",
+            "[resourceId('Microsoft.Devices/IotHubs/', variables('iotHubName'))]",
+            "[resourceId('Microsoft.Sql/servers/', variables('mssqlServer'))]",
+            "[resourceId('Microsoft.DocumentDB/databaseAccounts', variables('databaseAccountName'))]",
+            "[resourceId('microsoft.insights/components', variables('vpAppInsightName'))]"
+         ],
+         "properties":{  
+            "hardwareProfile":{  
+               "vmSize":"[variables('vmSize')]"
+            },
+            "osProfile":{  
+               "computerName":"[variables('gvavmName')]",
+               "adminUsername":"[parameters('adminUsername')]",
+               "adminPassword":"[parameters('adminPassword')]"
+            },
+            "storageProfile":{  
+               "imageReference":{  
+                  "publisher":"[variables('imagePublisher')]",
+                  "offer":"[variables('imageOffer')]",
+                  "sku":"[parameters('ubuntuOSVersion')]",
+                  "version":"latest"
+               },
+               "osDisk":{  
+                  "createOption":"FromImage"
+               },
+               "dataDisks":[  
+                  {  
+                     "diskSizeGB":500,
+                     "lun":0,
+                     "createOption":"Empty"
+                  }
+               ]
+            },
+            "networkProfile":{  
+               "networkInterfaces":[  
+                  {  
+                     "id":"[resourceId('Microsoft.Network/networkInterfaces',variables('gvaNicName'))]"
+                  }
+               ]
+            },
+            "diagnosticsProfile":{  
+               "bootDiagnostics":{  
+                  "enabled":true,
+                  "storageUri":"[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), '2016-01-01').primaryEndpoints.blob)]"
+               }
+            }
+         }
+      },
+      {  
+         "apiVersion":"2016-02-03",
+         "location":"[variables('location')]",
+         "name":"[variables('iotHubName')]",
+         "properties":{  
+            "eventHubEndpoints":{  
+               "events":{  
+                  "retentionTimeInDays":"[parameters('d2cMessageRetentionInDaysPeriod')]",
+                  "partitionCount":"[parameters('d2cPartitionCount')]"
+               },
+			   "operationsMonitoringEvents" : {
+			   "retentionTimeInDays":"[parameters('d2cMessageRetentionInDaysPeriod')]",
+                  "partitionCount":"[parameters('d2cPartitionCount')]"
+               }
+            },
+            "cloudToDevice":{  
+               "defaultTtlAsIso8601":"[parameters('c2dMessagesTTLAsIso8601')]",
+               "maxDeliveryCount":"[parameters('c2dMessagesMaxDeliveryCount')]",
+               "feedback":{  
+                  "maxDeliveryCount":"[parameters('c2dFeedbackMessagesMaxDeliveryCount')]",
+                  "ttlAsIso8601":"[parameters('c2dFeebackMessagesTTLAsIso8601')]",
+                  "lockDurationAsIso8601":"[parameters('c2dFeedbackMessagesLockDurationAsIso8601')]"
+               }
+            },
+            "location":"[parameters('location')]"
+         },
+         "sku":{  
+            "name":"[parameters('skuName')]",
+            "capacity":"[parameters('capacityUnits')]"
+         },
+         "type":"Microsoft.Devices/IotHubs"
+      },
+      {  
+         "apiVersion":"2016-02-03",
+         "dependsOn":[  
+            "[concat('Microsoft.Devices/iothubs/', variables('iotHubName'))]"
+         ],
+         "name":"[concat(variables('iotHubName'), '/events/',parameters('d2cConsumerGroupName'))]",
+         "type":"Microsoft.Devices/iotHubs/eventhubEndpoints/ConsumerGroups"
+      },
+      {  
+         "apiVersion":"2015-04-08",
+         "type":"Microsoft.DocumentDB/databaseAccounts",
+         "kind":"MongoDB",
+         "name":"[variables('databaseAccountName')]",
+         "location":"[parameters('location')]",
+         "properties":{  
+            "databaseAccountOfferType":"Standard",
+            "name":"[variables('databaseAccountName')]"
+         }
+      },
+      {  
+         "name":"[variables('mssqlServer')]",
+         "type":"Microsoft.Sql/servers",
+         "location":"[parameters('location')]",
+         "tags":{  
+            "displayName":"SqlServer"
+         },
+         "apiVersion":"2014-04-01",
+         "properties":{  
+            "administratorLogin":"[parameters('sqlAdminLogin')]",
+            "administratorLoginPassword":"[parameters('sqlAdminPassword')]",
+            "version":"12.0"
+         },
+         "resources":[  
+            {  
+               "name":"[variables('mssqlDatabaseName')]",
+               "type":"databases",
+               "location":"[parameters('location')]",
+               "tags":{  
+                  "displayName":"Database"
+               },
+               "apiVersion":"2015-01-01",
+               "dependsOn":[  
+                  "[variables('mssqlServer')]"
+               ],
+               "properties":{  
+                  "edition":"Basic",
+                  "collation":"SQL_Latin1_General_CP1_CI_AS",
+                  "maxSizeBytes":"1073741824",
+                  "requestedServiceObjectiveName":"Basic"
+               }
+            },
+            {  
+               "type":"firewallrules",
+               "apiVersion":"2014-04-01",
+               "dependsOn":[  
+                  "[variables('mssqlServer')]"
+               ],
+               "location":"[parameters('location')]",
+               "name":"AllowAllWindowsAzureIps",
+               "properties":{  
+                  "endIpAddress":"255.255.255.255",
+                  "startIpAddress":"0.0.0.0"
+               }
+            }
+         ]
+      },
+      {  
+         "name":"[variables('vpAppInsightName')]",
+         "type":"microsoft.insights/components",
+         "location":"[parameters('location')]",
+         "apiVersion":"2014-08-01",
+         "properties":{  
+            "ApplicationId":"[variables('vpAppInsightName')]",
+            "Application_Type":"[parameters('vpAppInsightType')]",
+            "Flow_Type":"Redfield",
+            "Request_Source":"[parameters('vpAppInsightRequestSource')]"
+         }
+      },
+	  	{
+      "apiVersion": "2017-08-01",
+      "type": "Microsoft.Web/serverfarms",
+      "kind": "app",
+      "name": "[variables('vpWebAppSrvcName')]",
+      "location": "[resourceGroup().location]",
+      "properties": { },
+      "dependsOn": [],
+      "sku": {
+        "name": "[parameters('skuName')]"
+      }
+    },
+    {
+      "apiVersion": "2016-08-01",
+      "type": "Microsoft.Web/sites",
+      "kind": "app",
+      "name": "[variables('vpWebProxyName')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('vpWebAppSrvcName'))]",
+		"httpsOnly": true
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', variables('vpWebAppSrvcName'))]"
+      ]
+    },
+	{
+      "apiVersion": "2017-08-01",
+      "type": "Microsoft.Web/serverfarms",
+      "kind": "app",
+      "name": "[variables('gvaWebAppSrvcName')]",
+      "location": "[resourceGroup().location]",
+      "properties": { },
+      "dependsOn": [],
+      "sku": {
+        "name": "[parameters('skuName')]"
+      }
+    },
+    {
+      "apiVersion": "2016-08-01",
+      "type": "Microsoft.Web/sites",
+      "kind": "app",
+      "name": "[variables('gvaWebProxyName')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('gvaWebAppSrvcName'))]",
+		"httpsOnly": true
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', variables('gvaWebAppSrvcName'))]"
+      ]
+    },
+    {  
+         "apiVersion":"2015-05-01-preview",
+         "type":"Microsoft.Compute/virtualMachines/extensions",
+         "name":"[variables('gvavmextName')]",
+         "location":"[resourceGroup().location]",
+         "dependsOn":[  
+            "[concat('Microsoft.Compute/virtualMachines/', concat(variables('gvavmName')))]"
+         ],
+         "tags":{  
+            "displayName":"gvaScriptExtension"
+         },
+         "properties":{  
+            "publisher":"Microsoft.Azure.Extensions",
+            "type":"CustomScript",
+            "typeHandlerVersion":"2.0",
+            "autoUpgradeMinorVersion":true,
+            "settings":{  
+	
+            },
+            "protectedSettings":{  
+               "commandToExecute":"[concat('sh ',variables('singleQuote'),variables('gva_bootup_script_name'),variables('singleQuote'),' ', variables('singleQuote'),variables('mssqlDbHost'),variables('singleQuote'),' ', parameters('mssqlDbName'),' ',parameters('sqlAdminLogin'),' ',parameters('sqlAdminPassword'),' ','IclpTemplateLogging',' ',variables('singleQuote'),'DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2016-01-01').keys[0].value, ';EndpointSuffix=core.windows.net', variables('singleQuote'),' ','msIgniteDevice',' ',variables('singleQuote'),reference(variables('eventHubReourceId')).eventHubEndpoints.events.path,variables('singleQuote') ,' ', variables('singleQuote'),'Endpoint=',reference(variables('eventHubReourceId')).eventHubEndpoints.events.endpoint,';SharedAccessKeyName=iothubowner;SharedAccessKey=',listKeys(resourceId('Microsoft.Devices/IotHubs',variables('iotHubName')),'2016-02-03').value[0].primaryKey ,variables('singleQuote'),' ',variables('singleQuote'), 'HostName=',variables('iotHubName'),'.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=',listKeys(resourceId('Microsoft.Devices/IotHubs/Iothubkeys', variables('iotHubName'), 'iothubowner'), '2016-02-03').primaryKey,variables('singleQuote'),' ',variables('singleQuote'),'HostName=',variables('iotHubName'),'.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=',listKeys(resourceId('Microsoft.Devices/IotHubs/Iothubkeys', variables('iotHubName'), 'iothubowner'), '2016-02-03').primaryKey,variables('singleQuote'),' ',variables('singleQuote'),'mstestdevice',variables('singleQuote'),' ',variables('singleQuote'),reference(variables('gvaAppInsightResourceId'), '2014-04-01').InstrumentationKey ,variables('singleQuote'),' ',variables('singleQuote'),variables('PCSurl'),variables('singleQuote'),' ',variables('singleQuote'),'/home/ubuntu/castle_canyon/security',variables('singleQuote'),' ',variables('singleQuote'),'disabled',variables('singleQuote'),' ',variables('singleQuote'),'mongodb://',variables('databaseAccountName'),'.documents.azure.com:10255/?ssl=true&replicaSet=globaldb',variables('singleQuote'),' ',variables('singleQuote'),variables('databaseAccountName'),variables('singleQuote'),' ',variables('singleQuote'),listKeys(variables('cosmosResourceId'), variables('cosmosApiVersion')).primaryMasterKey,variables('singleQuote'),' ',variables('singleQuote'),concat('http://',reference(variables('vpPublicIPAddressName')).dnsSettings.fqdn,':',variables('vpport')),variables('singleQuote'),' ',variables('singleQuote'),'http://',reference(variables('gvaPublicIPAddressName')).dnsSettings.fqdn,':3000', variables('singleQuote'),' ',variables('singleQuote'),variables('spAppId'),variables('singleQuote'),'  ',variables('singleQuote'),variables('gva_source_uri'),variables('singleQuote'),' > /home/ubuntu/gvalog.text 2>&1')]",
+               "fileUris":[  
+                  "[variables('gva_bootup_script_url')]"				  
+               ]
+            }
+         }
+      },
+      {  
+         "apiVersion":"2015-05-01-preview",
+         "type":"Microsoft.Compute/virtualMachines/extensions",
+         "name":"[variables('vpvmextName')]",
+         "location":"[resourceGroup().location]",
+         "dependsOn":[  
+            "[concat('Microsoft.Compute/virtualMachines/', concat(variables('gvavmName')))]",
+            "[concat('Microsoft.Compute/virtualMachines/', concat(variables('vpvmName')))]"
+         ],
+         "tags":{  
+            "displayName":"vpScriptExtension"
+         },
+         "properties":{  
+            "publisher":"Microsoft.Azure.Extensions",
+            "type":"CustomScript",
+            "typeHandlerVersion":"2.0",
+            "autoUpgradeMinorVersion":true,
+            "settings":{  
+		
+            },
+            "protectedSettings":{                
+               "commandToExecute":"[concat('sh ',variables('singleQuote'),variables('vp_bootup_script_name'),variables('singleQuote'),' ',  variables('singleQuote'),'mongodb://',variables('databaseAccountName'),':',listKeys(variables('cosmosResourceId'), variables('cosmosApiVersion')).primaryMasterKey,'@', variables('databaseAccountName'),'.documents.azure.com:10255/?ssl=true&replicaSet=globaldb',variables('singleQuote'),' ','3000',' ',variables('singleQuote'),'http://',reference(variables('gvaPublicIPAddressName')).dnsSettings.fqdn,':3001',variables('singleQuote'),' ',variables('singleQuote'),variables('PCSurl'),variables('singleQuote'),' ','60,120,180,240,300,600,900,1200,1500,1800,2100,2400,2700,3000,3300,3600,7200,10800,14400,18000,21600,25200,28800,32400,36000,54000,72000,86400,129600,172800',' ',variables('singleQuote'),'HostName=',variables('iotHubName'),'.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=',listKeys(resourceId('Microsoft.Devices/IotHubs/Iothubkeys', variables('iotHubName'), 'iothubowner'), '2016-02-03').primaryKey,variables('singleQuote'),' ',variables('singleQuote'),'DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2016-01-01').keys[0].value, ';EndpointSuffix=core.windows.net',variables('singleQuote'),' ',variables('singleQuote'),'http://',reference(variables('vpPublicIPAddressName')).dnsSettings.fqdn,':3000',variables('singleQuote'),' ',variables('singleQuote'),variables('emailAccount'),variables('singleQuote'),' ',variables('singleQuote'),variables('solutionName'),variables('singleQuote'),' ',variables('singleQuote'),variables('subscriptionId'),variables('singleQuote'),' ',variables('singleQuote'),variables('spAppId'),variables('singleQuote'),' ',variables('singleQuote'),variables('spObjectId'),variables('singleQuote'),' ',variables('singleQuote'),variables('spSecret'),variables('singleQuote'),' ',variables('singleQuote'),variables('tenantId'),variables('singleQuote'),' ',variables('singleQuote'),variables('email_server_webapp_name'),variables('singleQuote'),' ',variables('singleQuote'),variables('vp_source_uri'),variables('singleQuote'),' > /home/ubuntu/log.text 2>&1')]",
+               "fileUris":[  
+                  "[variables('vp_bootup_script_url')]"				  
+               ]
+            }
+         }
+      }
+   ],
+   "outputs":{  
+      "vphostname":{  
+         "type":"string",
+         "value":"[concat('http://',reference(variables('vpPublicIPAddressName')).dnsSettings.fqdn,':',variables('vpport'))]"
+      },
+      "vpport":{  
+         "type":"string",
+         "value":"[variables('vpport')]"
+      },
+      "gvahostname":{  
+         "type":"string",
+         "value":"[concat('http://',reference(variables('gvaPublicIPAddressName')).dnsSettings.fqdn,':3001')]"
+      },
+      "vpsshCommand":{  
+         "type":"string",
+         "value":"[concat('ssh ', parameters('adminUsername'), '@', reference(variables('vpPublicIPAddressName')).dnsSettings.fqdn)]"
+      },
+      "gvaInstance":{  
+         "type":"string",
+         "value":"[variables('gvaDnsLabelPrefix')]"
+      },
+      "gvasshCommand":{  
+         "type":"string",
+         "value":"[concat('ssh ', parameters('adminUsername'), '@', reference(variables('gvaPublicIPAddressName')).dnsSettings.fqdn)]"
+      },
+      "shipmentgw2cloudinterval":{  
+         "type":"string",
+         "value":"[variables('shipmentgw2cloudinterval')]"
+      },
+      "pcsurl":{  
+         "type":"string",
+         "value":"[variables('pcsurl')]"
+      },
+      "storageAccConnectionString":{  
+         "type":"string",
+         "value":"[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2016-01-01').keys[0].value, ';EndpointSuffix=core.windows.net')]"
+      },     
+      "cosmosDbUri":{  
+         "type":"string",
+         "value":"[concat('AccountEndpoint=https://', variables('databaseAccountName'), '.documents.azure.com:443/;AccountKey=', listKeys(variables('cosmosResourceId'), variables('cosmosApiVersion')).primaryMasterKey, ';')]"
+      },
+      "cosmosDbConnectionString":{  
+         "type":"string",
+         "value":"[concat('mongodb://',variables('databaseAccountName'),':',listKeys(variables('cosmosResourceId'), variables('cosmosApiVersion')).primaryMasterKey,'@', variables('databaseAccountName'),'.documents.azure.com:10255/?ssl=true&replicaSet=globaldb')]"
+      },
+      "cosmosDbHost":{  
+         "type":"string",
+         "value":"[concat('mongodb://',variables('databaseAccountName'),'.documents.azure.com:10255/?ssl=true&replicaSet=globaldb')]"
+      },
+      "cosmosDbUsername":{  
+         "type":"string",
+         "value":"[variables('databaseAccountName')]"
+      },
+      "cosmosDbPassword":{  
+         "type":"string",
+         "value":"[listKeys(variables('cosmosResourceId'), variables('cosmosApiVersion')).primaryMasterKey]"
+      },
+      "iotHub_host":{  
+         "type":"string",
+         "value":"[concat(variables('iotHubName'),'.azure-devices.net')]"
+      },
+      "iotHub_owner":{  
+         "type":"string",
+         "value":"[concat('HostName=',variables('iotHubName'),'.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=',listKeys(resourceId('Microsoft.Devices/IotHubs/Iothubkeys', variables('iotHubName'), 'iothubowner'), '2016-02-03').primaryKey)]"
+      },
+      "iotHub_registryServicePolicy":{  
+         "type":"string",
+         "value":"[concat('HostName=',variables('iotHubName'),'.azure-devices.net;SharedAccessKeyName=registryReadWrite;SharedAccessKey=',listKeys(resourceId('Microsoft.Devices/IotHubs/Iothubkeys', variables('iotHubName'), 'service'), '2016-02-03').primaryKey)]"
+      },
+      "iotHub_registryReadWrite":{  
+         "type":"string",
+         "value":"[concat('HostName=',variables('iotHubName'),'.azure-devices.net;SharedAccessKeyName=registryReadWrite;SharedAccessKey=',listKeys(resourceId('Microsoft.Devices/IotHubs/Iothubkeys', variables('iotHubName'), 'registryReadWrite'), '2016-02-03').primaryKey)]"
+      },
+      "iotHubKeys":{  
+         "value":"[listKeys(resourceId('Microsoft.Devices/iotHubs', variables('iotHubName')), variables('apiVersion'))]",
+         "type":"object"
+      },
+      "eventHub_compatible_name":{  
+         "type":"string",
+         "value":"[reference(variables('eventHubReourceId')).eventHubEndpoints.events.path]"
+      },
+      "eventHub_compatible_endpoint":{  
+         "type":"string",
+         "value":"[concat('Endpoint=',reference(variables('eventHubReourceId')).eventHubEndpoints.events.endpoint,';SharedAccessKeyName=iothubowner;SharedAccessKey=',listKeys(resourceId('Microsoft.Devices/IotHubs',variables('iotHubName')),'2016-02-03').value[0].primaryKey)]"
+      },
+      "mssqlDbHost":{  
+         "type":"string",
+         "value":"[variables('mssqlDbHost')]"
+      },
+      "mssqlDatabaseName":{  
+         "type":"string",
+         "value":"[variables('mssqlDatabaseName')]"
+      },
+      "mssqlDbUsername":{  
+         "type":"string",
+         "value":"[parameters('sqlAdminLogin')]"
+      },
+      "mssqlDbPassword":{  
+         "type":"string",
+         "value":"[parameters('sqlAdminPassword')]"
+      },
+      "mssqlDbConnectionString":{  
+         "type":"string",
+         "value":"[concat('Server=tcp:',variables('mssqlDbHost'),',1433;Initial Catalog=',variables('mssqlDatabaseName'),';Persist Security Info=False;User ID=',parameters('sqlAdminLogin'),';Password=',parameters('sqlAdminPassword'),';MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;')]"
+      },
+      "gvaAppInsightsInstrumentationKey":{  
+         "value":"[reference(variables('gvaAppInsightResourceId'), '2014-04-01').InstrumentationKey]",
+         "type":"string"
+      }
+   }
+}

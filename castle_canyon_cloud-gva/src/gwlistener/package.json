@@ -1,0 +1,13 @@
+{
+  "private": true,
+  "name": "gwlistener",
+  "version": "0.0.1",
+  "description": "Intel Castle Canyon GVA gateway listener",
+  "main": "gwlistener.js",
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "license": "see LICENSE at project root"
+}

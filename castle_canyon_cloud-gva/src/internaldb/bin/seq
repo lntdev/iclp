@@ -1,0 +1,11 @@
+#!/bin/bash
+
+DIR="$(dirname "$(readlink -f "$0")")"
+
+if [ ! -d "${DIR}/../node_modules" ]; then
+  cd "${DIR}/.."
+  npm i
+fi
+
+cd "${DIR}/../"
+"${DIR}/../node_modules/.bin/sequelize" --debug --config "${DIR}/../config/config.js" "$@"

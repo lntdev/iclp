@@ -1,0 +1,13 @@
+{
+  "private": true,
+  "name": "@ccprojecct/idgen",
+  "version": "0.0.1",
+  "description": "Castle Canyon GVA misc ID generation module",
+  "main": "idgen.js",
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "license": "see LICENSE at project root"
+}

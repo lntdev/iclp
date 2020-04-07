@@ -1,0 +1,48 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "solutionName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the solution"
+            }
+        }
+    },
+    "variables": {
+        "vpDnsLabelPrefix": "[concat('iclpvp', parameters('solutionName'))]",
+        "gvaDnsLabelPrefix": "[concat('iclpgva', parameters('solutionName'))]",
+        "databaseAccountName": "[toLower(concat('iothub-', parameters('solutionName')))]",
+        "iotHubName": "[toLower(concat('cosmosdb-', parameters('solutionName')))]",
+        "vpAppInsightName": "[toLower(concat('gvaappinsights-', parameters('solutionName')))]",
+        "location": "[resourceGroup().location]"
+    },    
+    "resources": [
+    ],
+    "outputs": {
+        "oVpDnsLabelPrefix" : {
+            "type": "string",
+            "value": "[variables('vpDnsLabelPrefix')]"
+        },
+        "oGvaDnsLabelPrefix" : {
+            "type": "string",
+            "value": "[variables('gvaDnsLabelPrefix')]"
+        },
+        "oDatabaseAccountName" : {
+            "type": "string",
+            "value": "[variables('databaseAccountName')]"
+        },
+        "oIotHubName" : {
+            "type": "string",
+            "value": "[variables('iotHubName')]"
+        },
+        "oVpAppInsightName" : {
+            "type": "string",
+            "value": "[variables('vpAppInsightName')]"
+        },
+        "oLocation" : {
+            "type": "string",
+            "value": "[variables('location')]"
+        }
+    }
+}

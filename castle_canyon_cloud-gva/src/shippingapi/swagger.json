@@ -1,0 +1,1265 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "ICLP Shipping APIs used by the VP",
+    "version": "GVA_CT_30.01.22",
+    "title": "ICLP Shipping APIs"
+  },
+  "tags": [
+    {
+      "name": "Session",
+      "description": "User session APIs"
+    },
+    {
+      "name": "Shipments",
+      "description": "shipment manipulation APIs"
+    },
+    {
+      "name": "Gateway",
+      "description": "Gateway manipulation APIs"
+    },
+    {
+      "name": "Sensor Data",
+      "description": "Retrival of telemetry data"
+    }
+  ],
+  "schemes": [
+    "https",
+    "http"
+  ],
+  "paths": {
+    "/session": {
+      "post": {
+        "tags": [
+          "Session"
+        ],
+        "summary": "Create a new user session",
+        "description": "Generates a Auth Token required for other API calls",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "User structure required for vaidation",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successfully logged in, token generated"
+          },
+          "400": {
+            "description": "Bad Request, Check the user role provided"
+          },
+          "401": {
+            "description": "Unauthorized, invalid Username or Password"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Session"
+        ],
+        "summary": "Identify the user, using the auth token",
+        "description": "Provides user credentails associated to the auth token",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "user token",
+            "required": true,
+            "type": "string",
+            "default": {
+              "$ref": "#/definitions/AuthToken"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfull"
+          },
+          "401": {
+            "description": "Unauthorized, unknown auth token"
+          }
+        }
+      }
+    },
+    "/shipments": {
+      "post": {
+        "tags": [
+          "Shipments"
+        ],
+        "summary": "Create a new shipment",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "user token",
+            "required": true,
+            "type": "string",
+            "default": {
+              "$ref": "#/definitions/AuthToken"
+            }
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Shipping details for creating this shipment",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateShipment"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successfully created the shipment, check response body for shipment ID."
+          },
+          "400": {
+            "description": "Bad Request, Check the request body for issues"
+          },
+          "401": {
+            "description": "Unauthorized, invalid Auth Token"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Shipments"
+        ],
+        "summary": "Get a set of shipments",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "user token",
+            "required": true,
+            "type": "string",
+            "default": {
+              "$ref": "#/definitions/AuthToken"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "new",
+              "inMonitoring",
+              "end"
+            ],
+            "default": "new"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully responded with all shipments."
+          },
+          "401": {
+            "description": "Unauthorized, invalid Auth Token"
+          }
+        }
+      }
+    },
+    "/shipments/{shipmentId}/monitor": {
+      "put": {
+        "summary": "Moves the shipment into Monitoring state",
+        "tags": [
+          "Shipments"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "shipmentId",
+            "description": "ID of shipment at the time of creation, returned by the Shippingapi",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "user token",
+            "required": true,
+            "type": "string",
+            "default": {
+              "$ref": "#/definitions/AuthToken"
+            }
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "List of Package Ids and Tag Ids for this shipment",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ProvisionShipment"
+            }
+          }
+        ],
+        "description": "Moves the shipment into Monitoring state",
+        "responses": {
+          "204": {
+            "description": "Successfully moved shipment to Monitoring State."
+          },
+          "400": {
+            "description": "Bad Request, Check the request body for issues"
+          },
+          "401": {
+            "description": "Unauthorized, invalid Auth Token"
+          }
+        }
+      }
+    },
+    "/shipments/{shipmentId}/monitor/config": {
+      "put": {
+        "summary": "Updates the thresholds for a particular shipment",
+        "tags": [
+          "Shipments"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "shipmentId",
+            "description": "ID of shipment at the time of creation, returned by the Shippingapi",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "user token",
+            "required": true,
+            "type": "string",
+            "default": {
+              "$ref": "#/definitions/AuthToken"
+            }
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "List of Package Tag Ids and their corresponding thresholds",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "tag2GwReportingTime": {
+                  "type": "integer",
+                  "format": "int32",
+                  "minimum": 15,
+                  "maximum": 60,
+                  "example": 60
+                },
+                "gw2CloudReportingTime": {
+                  "type": "integer",
+                  "format": "int32",
+                  "minimum": 60,
+                  "maximum": 172800,
+                  "example": 900
+                },
+                "shippingUnits": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "description": "package ID of shipping unit",
+                        "example": "ABCDEFGH12345678ABCDEFGH12345678"
+                      },
+                      "tags": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "description": "Tag ID of associated to this shipping unit",
+                              "example": "AMDHUWE20323SDFKN2399239"
+                            },
+                            "thresholds": {
+                              "$ref": "#/definitions/TagThreshold"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "description": "Moves the shipment into Monitoring state",
+        "responses": {
+          "204": {
+            "description": "Successfully moved shipment to Monitoring State."
+          },
+          "400": {
+            "description": "Bad Request, Check the request body for issues"
+          },
+          "401": {
+            "description": "Unauthorized, invalid Auth Token"
+          }
+        }
+      }
+    },
+    "/shipments/{shipmentId}/end": {
+      "put": {
+        "summary": "Moves the shipment into End State",
+        "tags": [
+          "Shipments"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "shipmentId",
+            "description": "ID of shipment at the time of creation, returned by the Shippingapi",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "user token",
+            "required": true,
+            "type": "string",
+            "default": {
+              "$ref": "#/definitions/AuthToken"
+            }
+          }
+        ],
+        "description": "Moves the shipment into End state",
+        "responses": {
+          "204": {
+            "description": "Successfully moved shipment to End State."
+          },
+          "400": {
+            "description": "Bad Request, Check the request body for issues"
+          },
+          "401": {
+            "description": "Unauthorized, invalid Auth Token"
+          }
+        }
+      }
+    },
+    "/shipments/{shipmentId}": {
+      "get": {
+        "tags": [
+          "Shipments"
+        ],
+        "summary": "Get a particular shipment",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "shipmentId",
+            "description": "ID of shipment at the time of creation, returned by the Shippingapi",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "user token",
+            "required": true,
+            "type": "string",
+            "default": {
+              "$ref": "#/definitions/AuthToken"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully responded with all shipments."
+          },
+          "401": {
+            "description": "Unauthorized, invalid Auth Token"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Deletes a Shipment",
+        "tags": [
+          "Shipments"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "shipmentId",
+            "description": "ID of shipment at the time of creation, returned by the Shippingapi",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "user token",
+            "required": true,
+            "type": "string",
+            "default": {
+              "$ref": "#/definitions/AuthToken"
+            }
+          }
+        ],
+        "description": "Deletes a Shipment",
+        "responses": {
+          "204": {
+            "description": "Successfully deleted a shipment."
+          },
+          "400": {
+            "description": "Bad Request, Check the request body for issues"
+          },
+          "401": {
+            "description": "Unauthorized, invalid Auth Token"
+          }
+        }
+      }
+    },
+    "/gateway/provision": {
+      "put": {
+        "tags": [
+          "Gateway"
+        ],
+        "summary": "Provision a gateway",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Gateway provisioning parameters",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ProvisionGateway"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "user token",
+            "required": true,
+            "type": "string",
+            "default": {
+              "$ref": "#/definitions/AuthToken"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successfully created the shipment, check response body for shipment ID."
+          },
+          "400": {
+            "description": "Bad Request, Check the request body for issues"
+          },
+          "401": {
+            "description": "Unauthorized, invalid Auth Token"
+          }
+        }
+      }
+    },
+    "/gateway/{gatewayId}": {
+      "get": {
+        "tags": [
+          "Gateway"
+        ],
+        "summary": "Get provison information about a provisioned Gateway",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "gatewayId",
+            "description": "UUID of Gatway you wish to get details of",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "user token",
+            "required": true,
+            "type": "string",
+            "default": {
+              "$ref": "#/definitions/AuthToken"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully executed command"
+          },
+          "401": {
+            "description": "Unauthorized, invalid Auth Token"
+          },
+          "404": {
+            "description": "Gateway Id was not found"
+          }
+        }
+      }
+    },
+    "/sensordata/{shipmentId}": {
+      "get": {
+        "summary": "Retrives telemetry data for a particular shipment",
+        "tags": [
+          "Sensor Data"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "shipmentId",
+            "description": "ID of shipment at the time of creation, returned by the Shippingapi",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "user token",
+            "required": true,
+            "type": "string",
+            "default": {
+              "$ref": "#/definitions/AuthToken"
+            }
+          }
+        ],
+        "description": "Retrives telemetry data for a particular shipment",
+        "responses": {
+          "200": {
+            "description": "Successfully executed command."
+          },
+          "401": {
+            "description": "Unauthorized, invalid Auth Token"
+          }
+        }
+      }
+    },
+    "/sensordata/{shipmentId}/tag/{tagId}": {
+      "get": {
+        "summary": "Retrives telemetry data for a particular tag",
+        "tags": [
+          "Sensor Data"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "shipmentId",
+            "description": "shipmentId of of the desired Shipment",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "path",
+            "name": "tagId",
+            "description": "tagId of the ICLP tag",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "user token",
+            "required": true,
+            "type": "string",
+            "default": {
+              "$ref": "#/definitions/AuthToken"
+            }
+          }
+        ],
+        "description": "Retrives all telemetry data for a particular tag that is associated to a particular shipment",
+        "responses": {
+          "200": {
+            "description": "Successfully executed command."
+          },
+          "400": {
+            "description": "Invalid input."
+          },
+          "401": {
+            "description": "Unauthorized, invalid Auth Token"
+          }
+        }
+      }
+    },
+    "/sensordata/{shipmentId}/tag/{tagId}/alerts": {
+      "get": {
+        "summary": "Retrives alerts for a particular tag",
+        "tags": [
+          "Sensor Data"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "shipmentId",
+            "description": "shipmentId of of the desired Shipment",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "path",
+            "name": "tagId",
+            "description": "tagId of the ICLP tag",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "user token",
+            "required": true,
+            "type": "string",
+            "default": {
+              "$ref": "#/definitions/AuthToken"
+            }
+          }
+        ],
+        "description": "Retrives only telemetry data that contain alerts (ie. anomalies) for a particular tag that is associated to a particular shipment",
+        "responses": {
+          "200": {
+            "description": "Successfully executed command."
+          },
+          "400": {
+            "description": "Invalid input."
+          },
+          "401": {
+            "description": "Unauthorized, invalid Auth Token"
+          }
+        }
+      }
+    },
+    "/sensordata/{shipmentId}/package/{packageId}": {
+      "get": {
+        "summary": "Retrives telemetry data for a particular package",
+        "tags": [
+          "Sensor Data"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "shipmentId",
+            "description": "shipmentId of of the desired Shipment",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "path",
+            "name": "packageId",
+            "description": "Package ID of the Shipping Unit",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "user token",
+            "required": true,
+            "type": "string",
+            "default": {
+              "$ref": "#/definitions/AuthToken"
+            }
+          }
+        ],
+        "description": "Retrives telemetry data for a particular package ID that is associated to a particualr shipment",
+        "responses": {
+          "200": {
+            "description": "Successfully moved shipment to End State."
+          },
+          "400": {
+            "description": "Invalid input."
+          },
+          "401": {
+            "description": "Unauthorized, invalid Auth Token"
+          }
+        }
+      }
+    },
+    "/sensordata/{shipmentId}/package/{packageId}/alerts": {
+      "get": {
+        "summary": "Retrives alerts for a particular package",
+        "tags": [
+          "Sensor Data"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "shipmentId",
+            "description": "shipmentId of of the desired Shipment",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "path",
+            "name": "packageId",
+            "description": "Package ID of the Shipping Unit",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "user token",
+            "required": true,
+            "type": "string",
+            "default": {
+              "$ref": "#/definitions/AuthToken"
+            }
+          }
+        ],
+        "description": "Retrives only telemetry data that contain alerts (ie. anomalies) for a particular package ID that is associated to a particualr shipment",
+        "responses": {
+          "200": {
+            "description": "Successfully moved shipment to End State."
+          },
+          "400": {
+            "description": "Invalid input."
+          },
+          "401": {
+            "description": "Unauthorized, invalid Auth Token"
+          }
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "user_token": {
+      "type": "apiKey",
+      "name": "OAuth",
+      "in": "header"
+    }
+  },
+  "definitions": {
+    "AuthToken": "OAuth 1ECdV+QsuLAmReSezPBDMHJ7CaEa6t/q+tKLNx0FIS3s53nbzsgdtlFxDVf8t3Yhn3H3TTI62tdz7rnehyqEww==",
+    "User": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string",
+          "description": "user email",
+          "example": "deskagent@localhost"
+        },
+        "password": {
+          "type": "string",
+          "description": "aplha numeric password",
+          "example": "deskagent"
+        },
+        "role": {
+          "type": "string",
+          "description": "DeskAgent or DockWorker",
+          "enum": [
+            "Desk Agent",
+            "Dock Worker"
+          ],
+          "default": "Desk Agent"
+        }
+      }
+    },
+    "CreateShipment": {
+      "type": "object",
+      "properties": {
+        "shipmentId": {
+          "type": "string",
+          "description": "Unique Alpha Numeric ID",
+          "example": "AA11BB22CC33DD44"
+        },
+        "uShipmentId": {
+          "type": "string",
+          "description": "Unique Alpha Numeric ID",
+          "example": "AA11BB22CC33DD44"
+        },
+        "shipmentName": {
+          "type": "string",
+          "description": "Any name for this shipment",
+          "example": "Shipment Via Swagger"
+        },
+        "referenceId": {
+          "type": "string",
+          "description": "Any Reference Shipment name or number",
+          "example": "FedEx shipment #BB11CC22DD33EE44"
+        },
+        "shippingUnitCount": {
+          "type": "integer",
+          "format": "int32",
+          "example": 1,
+          "description": "number of Shipping Units / packages in this shippment"
+        },
+        "shipmentNote": {
+          "type": "string",
+          "description": "Any notes for this shipment",
+          "example": "Handle with care"
+        },
+        "customerName": {
+          "type": "string",
+          "description": "Name of customer ordering this shipment",
+          "example": "James Bond"
+        },
+        "customerEmail": {
+          "type": "string",
+          "description": "Email address of customer",
+          "example": "JamesBond@mi6.co.uk"
+        },
+        "earliestPickup": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "latestDelivery": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "recipientName": {
+          "type": "string",
+          "description": "Name of Individual/company to whom the shipment will be delivered to",
+          "example": "M"
+        },
+        "tag2GwReportingTime": {
+          "type": "integer",
+          "format": "int32",
+          "example": 60
+        },
+        "gw2CloudReportingTime": {
+          "type": "integer",
+          "format": "int32",
+          "example": 900
+        },
+        "customerAddress": {
+          "$ref": "#/definitions/Address"
+        },
+        "pickupAddress": {
+          "$ref": "#/definitions/Address"
+        },
+        "deliveryAddress": {
+          "$ref": "#/definitions/Address"
+        },
+        "geofences": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Geofence"
+          }
+        },
+        "shippingUnits": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "tags": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "thresholds": {
+                      "$ref": "#/definitions/TagThreshold"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Address": {
+      "type": "object",
+      "properties": {
+        "line1": {
+          "type": "string",
+          "description": "First line of address",
+          "example": "some blvd"
+        },
+        "city": {
+          "type": "string",
+          "format": "City name",
+          "example": "portland"
+        },
+        "state": {
+          "type": "string",
+          "description": "State name",
+          "example": "OR"
+        },
+        "pin": {
+          "type": "string",
+          "description": "Pin code",
+          "example": "97124"
+        },
+        "country": {
+          "type": "string",
+          "description": "Country name",
+          "example": "US"
+        },
+        "phone": {
+          "type": "string",
+          "description": "Phone number",
+          "example": "+14255887805"
+        }
+      }
+    },
+    "Geofence": {
+      "type": "object",
+      "properties": {
+        "option": {
+          "type": "string",
+          "description": "type of geofence, choose one, source, destination or ocean",
+          "example": "ocean"
+        },
+        "shape": {
+          "type": "string",
+          "description": "the shape of the geofence, only circle supported as of now",
+          "example": "circle"
+        },
+        "coordinates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Coordinates"
+          }
+        },
+        "breachAction": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/definitions/BreachActionSMS"
+              },
+              {
+                "$ref": "#/definitions/BreachActionAPM"
+              },
+              {
+                "$ref": "#/definitions/BreachActionCaliberate"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "Coordinates": {
+      "type": "object",
+      "properties": {
+        "latitude": {
+          "type": "string",
+          "description": "Latitude of center of circle",
+          "example": "0.0"
+        },
+        "longitude": {
+          "type": "string",
+          "description": "Longitude of center of circle",
+          "example": "0.0"
+        },
+        "radius": {
+          "type": "string",
+          "description": "Radius of the circle in Kilometers",
+          "example": "5"
+        }
+      }
+    },
+    "BreachActionSMS": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Type of alert action",
+          "example": "SMS alert"
+        },
+        "customerPhone": {
+          "type": "boolean",
+          "description": "delivery SMS to Customer Phone Number?",
+          "example": true
+        },
+        "pickupPhone": {
+          "type": "boolean",
+          "description": "delivery SMS to Pickup address Phone Number?",
+          "example": true
+        },
+        "deliveryPhone": {
+          "type": "boolean",
+          "description": "delivery SMS to Delivery address Phone Number?",
+          "example": true
+        }
+      }
+    },
+    "BreachActionAPM": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "description": "Type of alert action",
+          "example": "Enable APM"
+        },
+        "ducration": {
+          "type": "string",
+          "description": "Time duration for keeping GW in APM, in minutes",
+          "example": "15"
+        }
+      }
+    },
+    "BreachActionCaliberate": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "description": "Type of alert action",
+          "example": "Calibrate Shipment"
+        }
+      }
+    },
+    "TagThreshold": {
+      "type": "object",
+      "properties": {
+        "temperature": {
+          "type": "object",
+          "properties": {
+            "enable": {
+              "type": "boolean",
+              "example": true
+            },
+            "min": {
+              "type": "integer",
+              "example": 0,
+              "description": "in degrees C"
+            },
+            "max": {
+              "type": "integer",
+              "example": 50,
+              "description": "in degrees C"
+            }
+          }
+        },
+        "humidity": {
+          "type": "object",
+          "properties": {
+            "enable": {
+              "type": "boolean",
+              "example": true
+            },
+            "min": {
+              "type": "integer",
+              "example": 10,
+              "description": "in %"
+            },
+            "max": {
+              "type": "integer",
+              "example": 70,
+              "description": "in %"
+            }
+          }
+        },
+        "light": {
+          "type": "object",
+          "properties": {
+            "enable": {
+              "type": "boolean",
+              "example": true
+            },
+            "min": {
+              "type": "integer",
+              "example": 0,
+              "description": "in Lux"
+            },
+            "max": {
+              "type": "integer",
+              "example": 5000,
+              "description": "in Lux"
+            }
+          }
+        },
+        "tilt": {
+          "type": "object",
+          "properties": {
+            "enable": {
+              "type": "boolean",
+              "example": true
+            },
+            "max": {
+              "type": "integer",
+              "example": 90,
+              "description": "in degrees"
+            }
+          }
+        },
+        "shock": {
+          "type": "object",
+          "properties": {
+            "enable": {
+              "type": "boolean",
+              "example": true
+            },
+            "max": {
+              "type": "integer",
+              "example": 5000,
+              "description": "in mili G's"
+            }
+          }
+        },
+        "battery": {
+          "type": "object",
+          "properties": {
+            "enable": {
+              "type": "boolean",
+              "example": true
+            },
+            "min": {
+              "type": "integer",
+              "example": 10,
+              "description": "% of remaining battery capicity"
+            }
+          }
+        }
+      }
+    },
+    "ProvisionShipment": {
+      "type": "object",
+      "properties": {
+        "shippingUnits": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "unitId": {
+                "type": "string",
+                "example": "ABCDEFGH12345678ABCDEFGH12345678",
+                "description": "Package ID for this shipping unit"
+              },
+              "tagId": {
+                "type": "string",
+                "example": "AMDHUWE20323SDFKN2399239",
+                "description": "Tag ID of tag attached to this shipping unit"
+              }
+            }
+          }
+        }
+      }
+    },
+    "ProvisionGateway": {
+      "type": "object",
+      "properties": {
+        "gatewayId": {
+          "type": "string",
+          "example": "ABCDEFGHIJ1234567890ABCDEFGHIJ12",
+          "description": "Gateway UUID"
+        },
+        "gatewayWsnId": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535,
+          "example": 400,
+          "description": "WSN ID for the Gateway"
+        },
+        "panId": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535,
+          "example": 600,
+          "description": "PAN ID for the Gateway"
+        },
+        "channelId": {
+          "type": "integer",
+          "minimum": 11,
+          "maximum": 25,
+          "example": 24,
+          "description": "WSN Channel ID that the Gateway will operate on"
+        },
+        "macroInterval": {
+          "type": "integer",
+          "minimum": 60,
+          "maximum": 172800,
+          "example": 900,
+          "description": "Macro reporting interval for WSN, macro interval should be a multiple of micor interval"
+        },
+        "microInterval": {
+          "type": "integer",
+          "minimum": 15,
+          "maximum": 60,
+          "example": 60,
+          "description": "Micro reporting interval for WSN"
+        }
+      }
+    }
+  }
+}

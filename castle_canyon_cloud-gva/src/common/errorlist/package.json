@@ -1,0 +1,13 @@
+{
+  "private": true,
+  "name": "@ccproject/errorlist",
+  "version": "0.0.1",
+  "description": "Castle Canyon GVA common errorlist module",
+  "main": "errorlist.js",
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "license": "see LICENSE at project root"
+}

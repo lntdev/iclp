@@ -1,0 +1,288 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "ICLP Keystore/rendezvous Server APIs",
+    "description": "Used by GW devices to get their cloud credentails. And SI/OEM for device fulfilment..",
+    "version": "GVA_CT_30.01.22"
+  },
+  "tags": [
+    {
+      "name": "Device",
+      "description": "APIs used to authenticate and provide credentials to field devices"
+    },
+    {
+      "name": "Admin",
+      "description": "APIs for device record management"
+    }
+  ],
+  "schemes": [
+    "https",
+    "http"
+  ],
+  "paths": {
+    "/device/challenge/{uuid}": {
+      "get": {
+        "tags": [
+          "Device"
+        ],
+        "summary": "Provides a challenge to the device for later authentication",
+        "description": "A challenge string is provided to the GW device along with the ECDH public key of the Server. The Challenge needs to be responded within a certain amount of time, or else it will expire. The GW needs to provide its UUID and its ECDH public key, only if these to attributes matches in the keystore database, will the GW be provided with the challenge",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "uuid",
+            "description": "uuid of gateway device",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "gwEcdhPublicKey",
+            "description": "The ECDH public key of the gateway device that is calling this api",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfull, challenge has been provided in the response body along with the servers ECDH public key"
+          },
+          "400": {
+            "description": "Input Validation, Failure"
+          },
+          "401": {
+            "description": "Unauthorized, the UUID and and ECDH public key of the GW did not match the record in the keystore database"
+          },
+          "404": {
+            "description": "UUID was not found in the database"
+          }
+        }
+      }
+    },
+    "/device/credentials/{uuid}": {
+      "get": {
+        "tags": [
+          "Device"
+        ],
+        "summary": "Provides the device credentials to authorised devices",
+        "description": "Cloud credentails are provided to authorised devices that manage to respond to the provided challenge",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "uuid",
+            "description": "uuid of gateway device",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "challengeResponse",
+            "description": "The computed challenge-response using the EK of the GW",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfull, cloud credentials provided in the body of the response"
+          },
+          "400": {
+            "description": "Input Validation, Failure"
+          },
+          "401": {
+            "description": "Unauthorized, the UUID and and ECDH public key of the GW did not match the record in the keystore database"
+          },
+          "404": {
+            "description": "UUID was not found in the database"
+          }
+        }
+      }
+    },
+    "/admin/device": {
+      "put": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Adds a new device record into the keystore database",
+        "description": "Used by OEM / SI to add new devices into the keystore database.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "device record",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "deviceUuid": {
+                  "type": "string",
+                  "description": "UUID of device 32 byte String",
+                  "example": "ABCDEFGHIJ1234567890123456789012"
+                },
+                "typeOfDevice": {
+                  "type": "string",
+                  "description": "Gateway or Tag device",
+                  "example": "gateway"
+                },
+                "hwRevision": {
+                  "type": "string",
+                  "description": "Version of HW",
+                  "example": 1
+                },
+                "swRevision": {
+                  "type": "string",
+                  "description": "Version of SW running on device",
+                  "example": 1
+                },
+                "odmId": {
+                  "type": "string",
+                  "description": "ID or name of the OEM",
+                  "example": "ECS"
+                },
+                "ownerName": {
+                  "type": "string",
+                  "description": "Name of customer to whom this device has been assigned to",
+                  "example": "Company X"
+                },
+                "dateOfManufacture": {
+                  "type": "string",
+                  "description": "Date of manufacture of the device (ISO 8601)",
+                  "example": "2019-11-22T11:10:52.000Z"
+                },
+                "signedEcdsaPublicKeyCertificate": {
+                  "type": "string",
+                  "description": "OEM signed ECDSA Public key of the device",
+                  "example": "key"
+                },
+                "deviceEcdhPublicKey": {
+                  "type": "string",
+                  "description": "ECDH Public Key of the device",
+                  "example": "key"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfull, cloud credentials provided in the body of the response"
+          },
+          "400": {
+            "description": "Input Validation, Failure"
+          },
+          "401": {
+            "description": "Unauthorized, the UUID and and ECDH public key of the GW did not match the record in the keystore database"
+          },
+          "404": {
+            "description": "UUID was not found in the database"
+          }
+        }
+      }
+    },
+    "/admin/device/update": {
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "summary": "Updates device record into the keystore database",
+        "description": "Used by OEM / SI to udpate a devices record in the keystore database.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "device record",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "deviceUuid": {
+                  "type": "string",
+                  "description": "UUID of device 32 byte String",
+                  "example": "ABCDEFGHIJ1234567890123456789012"
+                },
+                "typeOfDevice": {
+                  "type": "string",
+                  "description": "Gateway or Tag device",
+                  "example": "gateway"
+                },
+                "hwRevision": {
+                  "type": "string",
+                  "description": "Version of HW",
+                  "example": 1
+                },
+                "swRevision": {
+                  "type": "string",
+                  "description": "Version of SW running on device",
+                  "example": 1
+                },
+                "odmId": {
+                  "type": "string",
+                  "description": "ID or name of the OEM",
+                  "example": "ECS"
+                },
+                "ownerName": {
+                  "type": "string",
+                  "description": "Name of customer to whom this device has been assigned to",
+                  "example": "Company X"
+                },
+                "dateOfManufacture": {
+                  "type": "string",
+                  "description": "Date of manufacture of the device (ISO 8601)",
+                  "example": "2019-11-22T11:10:52.000Z"
+                },
+                "signedEcdsaPublicKeyCertificate": {
+                  "type": "string",
+                  "description": "OEM signed ECDSA Public key of the device",
+                  "example": "key"
+                },
+                "deviceEcdhPublicKey": {
+                  "type": "string",
+                  "description": "ECDH Public Key of the device",
+                  "example": "key"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfull, cloud credentials provided in the body of the response"
+          },
+          "400": {
+            "description": "Input Validation, Failure"
+          },
+          "401": {
+            "description": "Unauthorized, the UUID and and ECDH public key of the GW did not match the record in the keystore database"
+          },
+          "404": {
+            "description": "UUID was not found in the database"
+          }
+        }
+      }
+    }
+  }
+}

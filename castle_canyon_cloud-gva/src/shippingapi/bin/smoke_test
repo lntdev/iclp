@@ -1,0 +1,205 @@
+#!/usr/bin/env node
+
+/*eslint-disable no-console */
+
+(async () => {
+  try {
+    const util = require('util');
+    const argv = process.argv;
+    const usage ='usage: smoke_test "<base_url>" "<username<" "<password>"';
+
+    if (argv.length < 5) {
+      console.error(usage);
+      process.exit(1);
+    }
+
+    const request = require('superagent');
+    const baseUrl = argv[2];
+    const username = argv[3];
+    const password = argv[4];
+    const now = new Date();
+    const testData = require(__dirname + '/../../test/data');
+    const testShip = testData.shipment;
+    const testAddr = testData.address;
+    const testTag = testData.tag;
+
+    console.log(`Trying base URL [${baseUrl}] with user [${username}] and password [${password}].`);
+
+    let res;
+
+    /**
+     * Login
+     */
+
+    res = await request
+      .post(baseUrl + '/session')
+      .send({username: username, password: password})
+      .set('accept', 'json');
+
+    token = res.body.token;
+
+    console.log(`Login OK. Received token [${token}].`);
+
+    res = await request
+      .get(baseUrl + '/session')
+      .set(...tokenHeader(token))
+
+    console.log(`Session OK. Logged in as [${res.body.username}].`);
+
+    /**
+     * Create shipment
+     */
+
+    const shipmentSpec = {
+      shipmentId: testShip.anyShipmentId(),
+      uShipmentId: testShip.anyUniqueShipmentId(),
+      shipmentName: testShip.anyShipmentName(),
+      shippingUnitCount: testShip.anyShippingUnitCount(),
+      referenceId: testShip.anyReferenceId(),
+      shipmentNote: testShip.anyShipmentNote(),
+      customerName: testShip.anyCustomerName(),
+      customerEmail: testShip.anyCustomerEmail(),
+      customerAddress: {
+        line1: testAddr.anyLine1(),
+        city: testAddr.anyCity(),
+        state: testAddr.anyState(),
+        pin: testAddr.anyPin(),
+        country: testAddr.anyCountry(),
+        phone: testAddr.anyPhone()
+      },
+      earliestPickup: now,
+      latestDelivery: now, // validation of time distance/logic is not the SUT
+      pickupAddress: {
+        line1: testAddr.anyLine1(),
+        city: testAddr.anyCity(),
+        state: testAddr.anyState(),
+        pin: testAddr.anyPin(),
+        country: testAddr.anyCountry(),
+        phone: testAddr.anyPhone()
+      },
+      deliveryAddress: {
+        line1: testAddr.anyLine1(),
+        city: testAddr.anyCity(),
+        state: testAddr.anyState(),
+        pin: testAddr.anyPin(),
+        country: testAddr.anyCountry(),
+        phone: testAddr.anyPhone()
+      },
+      tag2GwReportingTime: testShip.anyTag2GwReportingTime(),
+      gw2CloudReportingTime: testShip.anyGw2CloudReporingTime(),
+      gateways: [
+        {
+          shippingUnits: [
+            {
+              tags: [
+                {
+                  thresholds: {
+                    temperature: {
+                      min: testTag.anyTemperatureMin(),
+                      max: testTag.anyTemperatureMax()
+                    },
+                    humidity: {
+                      min: testTag.anyHumidityMin(),
+                      max: testTag.anyHumidityMax()
+                    },
+                    light: {
+                      min: testTag.anyLightMin(),
+                      max: testTag.anyLightMax()
+                    },
+                    pressure: {
+                      min: testTag.anyPressureMin(),
+                      max: testTag.anyPressureMax()
+                    },
+                    tilt: {
+                      max: testTag.anyTiltMax()
+                    },
+                    shock: {
+                      max: testTag.anyShockMax()
+                    },
+                    battery: {
+                      min: testTag.anyBatteryMin()
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    };
+
+    res = await request
+      .post(baseUrl + '/shipments')
+      .send(shipmentSpec)
+      .set(...tokenHeader(token))
+      .set('accept', 'json');
+
+    const id = parseInt(res.body.id, 10);
+    if (id > 0) {
+      console.log(`Shipment creation OK (id = [${id}]).`);
+    } else {
+      console.log('Shipment creation endpoint did not return its ID');
+      process.exit(1);
+    }
+
+    /**
+     * Get individual shipment
+     */
+    res = await request
+      .get(baseUrl + '/shipments/' + id)
+      .set(...tokenHeader(token))
+      .set('accept', 'json');
+
+    if (res.body && id === res.body.id) {
+      console.log('GET for individual shipment OK:\n', JSON.stringify(res.body, null, 2));
+    } else {
+      console.error(`GET for individual shipment returned an invalid "id" [${res.body.id}].`);
+      process.exit(1);
+    }
+
+    /**
+     * Get list of shipments.
+     */
+    res = await request
+      .get(baseUrl + '/shipments')
+      .set(...tokenHeader(token))
+      .set('accept', 'json');
+
+    if (res.body && Array.isArray(res.body.shipments)) {
+      console.log('GET for shipment list OK:\n', JSON.stringify(res.body, null, 2));
+    } else {
+      console.error('GET for shipment list failed');
+      process.exit(1);
+    }
+
+    /**
+     * Logout
+     */
+
+    res = await request
+      .delete(baseUrl + '/session')
+      .set(...tokenHeader(token))
+      .set('accept', 'json');
+
+    let finalSessionCheckStatusCode;
+    try {
+      res = await request
+        .get(baseUrl + '/session')
+        .set(...tokenHeader(token))
+    } catch (e) {
+      finalSessionCheckStatusCode = e.status;
+    }
+
+    if (finalSessionCheckStatusCode === 401) {
+      console.log('Logout OK.');
+    } else {
+      console.log('Logout failed.', finalSessionCheckStatusCode);
+    }
+  } catch (e) {
+    console.error(e);
+  }
+})();
+
+function tokenHeader(token) {
+  return ['Authorization', 'OAuth ' + token];
+}

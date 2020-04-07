@@ -1,0 +1,13 @@
+{
+  "private": true,
+  "name": "@ccprojecct/config",
+  "version": "0.0.1",
+  "description": "Intel Castle Canyon commong configuration module for enture GVA",
+  "main": "config.js",
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "license": "see LICENSE at project root"
+}

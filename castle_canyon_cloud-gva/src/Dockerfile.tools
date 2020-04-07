@@ -1,0 +1,69 @@
+FROM ubuntu:xenial
+
+ENV LC_ALL "en_US.UTF-8"
+ENV PATH /opt/mssql-tools/bin:/home/ubuntu/npm_home/bin:/home/ubuntu/castle_canyon/node_modules/pm2/bin:$PATH
+ENV NODE_PATH "."
+
+# Allowed --build-arg
+ARG NODE_VER
+ARG MSSQL_TOOLS_VER
+ARG MSODBCSQL_VER
+ARG UBUNTU_VER
+
+ARG DEBIAN_FRONTEND=noninteractive
+ARG MS_REPO_URL="https://packages.microsoft.com/config/ubuntu/${UBUNTU_VER}/prod.list"
+
+# To avoid dpkg error that EULA wasn't accepted.
+ARG ACCEPT_EULA=Y
+
+# locales package, LC_ALL setting above, and locale-gen command is required to avoid an sqlcmd crash with error:
+#   terminate called after throwing an instance of 'std::runtime_error'
+#   what():  locale::facet::_S_create_c_locale name not valid
+
+
+# - Include SSH for git cloning.
+# - Include git/build-essential/ca-certificates for NPM-triggered downloads/compilations.
+# - Verify gpg and sha256: https://nodejs.org/dist/v<VERSION>/SHASUMS256.txt.gpg
+#   gpg: aka "Rod Vagg <rod@vagg.org>"
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends wget curl ca-certificates \
+    software-properties-common libcurl3 unixodbc locales build-essential git openssh-client nano \
+    && curl -SLO "https://nodejs.org/dist/v$NODE_VER/node-v$NODE_VER-linux-x64.tar.gz" \
+    && curl -SLO "https://nodejs.org/dist/v$NODE_VER/SHASUMS256.txt.asc" \
+    && grep " node-v$NODE_VER-linux-x64.tar.gz\$" SHASUMS256.txt.asc | sha256sum -c - \
+    && tar -xzf "node-v$NODE_VER-linux-x64.tar.gz" -C /usr/local --strip-components=1 \
+    && rm "node-v$NODE_VER-linux-x64.tar.gz" SHASUMS256.txt.asc
+
+
+RUN locale-gen "en_US.UTF-8"
+RUN \
+    cd /tmp && \
+    wget --max-redirect 5 --quiet -O ./mssql-tools.deb https://packages.microsoft.com/ubuntu/${UBUNTU_VER}/prod/pool/main/m/mssql-tools/mssql-tools_${MSSQL_TOOLS_VER}_amd64.deb && \
+    wget --max-redirect 5 --quiet -O ./msodbcsql.deb https://packages.microsoft.com/ubuntu/${UBUNTU_VER}/prod/pool/main/m/msodbcsql/msodbcsql_${MSODBCSQL_VER}_amd64.deb
+
+RUN cd /tmp && dpkg -i ./*.deb
+
+RUN apt-get autoremove -y
+RUN apt-get clean -y
+RUN rm -rf /var/lib/apt/lists/*
+
+RUN useradd --create-home --shell /bin/bash ubuntu
+
+ADD package.json                        /home/ubuntu/castle_canyon/
+ADD package-lock.json                   /home/ubuntu/castle_canyon/
+ADD devicesim                           /home/ubuntu/castle_canyon/devicesim/
+ADD devprovtool                         /home/ubuntu/castle_canyon/devprovtool/
+ADD shippingapi                         /home/ubuntu/castle_canyon/shippingapi/
+ADD internaldb                          /home/ubuntu/castle_canyon/internaldb/
+ADD common                              /home/ubuntu/castle_canyon/common/
+ADD node_modules                        /home/ubuntu/castle_canyon/node_modules/
+ADD containers/thisoldtool/runprocs.sh  /home/ubuntu/
+
+RUN chown -R ubuntu.ubuntu /home/ubuntu/castle_canyon
+
+USER ubuntu:ubuntu
+
+ENV TERM linux
+
+CMD ["/bin/bash", "-c", "/home/ubuntu/runprocs.sh"]

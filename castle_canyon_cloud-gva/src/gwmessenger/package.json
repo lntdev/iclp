@@ -1,0 +1,13 @@
+{
+  "private": true,
+  "name": "gwmessenger",
+  "version": "0.0.1",
+  "description": "Intel Castle Canyon GVA gateway messenger",
+  "main": "gwmessenger.js",
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "license": "see LICENSE at project root"
+}

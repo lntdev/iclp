@@ -1,0 +1,13 @@
+{
+  "private": true,
+  "name": "@ccprojecct/gwcomms",
+  "version": "0.0.1",
+  "description": "Castle Canyon GVA common gateway send / recv helper module",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "license": "see LICENSE at project root"
+}

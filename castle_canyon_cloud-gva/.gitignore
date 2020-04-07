@@ -1,0 +1,14 @@
+**/*~
+**/~$*\.pptx
+**/container-env-private\.txt
+**/privates\.js
+**/node_modules/*
+!**/node_modules/cccommon
+!**/this_pkg
+/*.sh
+/src/*.sh
+private
+**/security/ssl/server.key
+**/security/ssl/server.cert
+**/security/ssl/server.ca-bundle
+src/Dockerfile.release

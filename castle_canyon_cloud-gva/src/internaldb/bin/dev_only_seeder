@@ -1,0 +1,12 @@
+#!/bin/bash
+
+DIR="$(dirname "$(readlink -f "$0")")"
+
+if [ ! -d "${DIR}/../node_modules" ]; then
+  cd "${DIR}/.."
+  npm i
+fi
+
+"${DIR}/seq" db:seed --debug --seed 20171106214634-three-dev-users.js
+"${DIR}/seq" db:seed --debug --seed 20171119221134-add-2nd-dockworker.js
+"${DIR}/seq" db:seed --debug --seed 20191031100339-swagger-user.js 

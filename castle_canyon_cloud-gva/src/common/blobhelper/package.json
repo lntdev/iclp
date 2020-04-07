@@ -1,0 +1,13 @@
+{
+  "private": true,
+  "name": "@ccprojecct/blobhelper",
+  "version": "0.0.1",
+  "description": "Intel Castle Canyon common blob storage helper module",
+  "main": "blobhelper.js",
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "license": "see LICENSE at project root"
+}
