@@ -7,7 +7,7 @@
   "dependencies": {
     "@azure/event-hubs": "5.0.0",
     "applicationinsights": "1.0.7",
-    "async": "2.5.0",
+    "async": "2.6.4",
     "azure": "2.2.1-preview",
     "azure-iot-common": "1.7.3",
     "azure-iot-device": "1.11.2",
