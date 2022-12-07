@@ -21,7 +21,7 @@
     "deepmerge": "2.0.1",
     "ec-pem": "0.17.1",
     "es5-shim": "4.5.9",
-    "express": "4.16.2",
+    "express": "4.17.3",
     "express-request-id": "1.4.0",
     "express-session": "1.15.6",
     "eyes": "0.1.8",
